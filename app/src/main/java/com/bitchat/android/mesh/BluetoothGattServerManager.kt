@@ -379,11 +379,6 @@ class BluetoothGattServerManager(
             Log.w(TAG, "Not starting advertising: BLE advertiser not available on this device")
             return
         }
-        if (!bluetoothAdapter.isMultipleAdvertisementSupported) {
-            Log.w(TAG, "Not starting advertising: multiple advertisement not supported on this device")
-            return
-        }
-
         val settings = powerManager.getAdvertiseSettings()
         
         val data = AdvertiseData.Builder()

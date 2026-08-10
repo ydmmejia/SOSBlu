@@ -374,9 +374,10 @@ class BluetoothGattClientManager(
         val deviceAddress = device.address
         val scanRecord = result.scanRecord
         
-        // CRITICAL: Only process devices that have our service UUID
-        val hasOurService = scanRecord?.serviceUuids?.any { it.uuid == AppConstants.Mesh.Gatt.SERVICE_UUID } == true
-        if (!hasOurService) {
+        // CRITICAL: Process devices that contain our service UUID in serviceUuids OR serviceData
+        val hasOurUuid = scanRecord?.serviceUuids?.any { it.uuid == AppConstants.Mesh.Gatt.SERVICE_UUID } == true
+        val hasOurServiceData = scanRecord?.serviceData?.containsKey(ParcelUuid(AppConstants.Mesh.Gatt.SERVICE_UUID)) == true
+        if (!hasOurUuid && !hasOurServiceData) {
             return
         }
 
