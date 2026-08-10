@@ -491,7 +491,13 @@ class MeshCore(
                 messageHandler.handlePublicVoiceFrame(routed)
 
             override fun handleSOSBeacon(routed: RoutedPacket): Boolean {
-                com.bitchat.android.services.BridgeRelayService.getInstance(context).onSOSBeaconPacketReceived(routed.packet)
+                try {
+                    val clazz = Class.forName("com.bitchat.android.services.BridgeRelayService")
+                    val method = clazz.getMethod("getInstance", android.content.Context::class.java)
+                    val instance = method.invoke(null, context)
+                    val handleMethod = clazz.getMethod("onSOSBeaconPacketReceived", com.bitchat.android.protocol.BitchatPacket::class.java, java.lang.Integer.TYPE)
+                    handleMethod.invoke(instance, routed.packet, null)
+                } catch (_: Exception) { }
                 return true
             }
 
