@@ -10,6 +10,18 @@
 ================================================================================
 ```
 
+<p align="center">
+  <a href="https://github.com/ydmmejia/SOSBlu/releases">
+    <img src="https://img.shields.io/github/v/release/ydmmejia/SOSBlu?color=B71C1C&style=for-the-badge&logo=github&label=Version" alt="Ultima Version" />
+  </a>
+  <a href="https://github.com/ydmmejia/SOSBlu/releases">
+    <img src="https://img.shields.io/github/downloads/ydmmejia/SOSBlu/total?color=00C851&style=for-the-badge&logo=github&label=Descargas" alt="Descargas Totales" />
+  </a>
+  <img src="https://img.shields.io/badge/Android-API%2026%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android API 26+" />
+  <img src="https://img.shields.io/badge/Red-BLE%20Mesh%20Offline-007ACC?style=for-the-badge&logo=bluetooth&logoColor=white" alt="BLE Mesh" />
+  <img src="https://img.shields.io/badge/Criptografia-Ed25519%20%2B%20Noise-6C757D?style=for-the-badge&logo=shield&logoColor=white" alt="Ed25519 Noise" />
+</p>
+
 ## Resumen Ejecutivo
 
 **SOSBlu** es una plataforma móvil de telecomunicaciones de emergencia diseñada para el rescate de víctimas atrapadas tras desastres naturales (terremotos, colapsos estructurales, deslaves) en escenarios con colapso total de infraestructura celular e internet.
