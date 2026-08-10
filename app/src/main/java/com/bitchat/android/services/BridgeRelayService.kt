@@ -17,6 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -115,6 +121,7 @@ class BridgeRelayService private constructor(context: Context) {
             currentList[index] = beaconToStore
         } else {
             currentList.add(0, beaconToStore)
+            triggerEmergencyNotification(beaconToStore)
         }
         _receivedBeacons.value = currentList
 
@@ -123,6 +130,58 @@ class BridgeRelayService private constructor(context: Context) {
             scope.launch {
                 relayToGateway(beaconToStore, deduplicationKey)
             }
+        }
+    }
+
+    private fun triggerEmergencyNotification(beacon: ReceivedSOSBeacon) {
+        try {
+            val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                ?: return
+
+            val channelId = "sosblu_emergency_alerts"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    channelId,
+                    "Alertas SOS de Emergencia",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Alertas sonoras y de vibración cuando se recibe un faro de auxilio SOS cercano."
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
+                    enableLights(true)
+                    lightColor = android.graphics.Color.RED
+                }
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            val intent = Intent(appContext, com.bitchat.android.MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                appContext,
+                beacon.senderDeviceIdHex.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val payload = beacon.payload
+            val noteText = if (!payload.freeText.isNullOrBlank()) " Nota: ${payload.freeText}" else ""
+            val body = "Víctima ID: ${beacon.senderDeviceIdHex.take(8).uppercase()} (Batería: ${payload.batteryLevel}%).$noteText"
+
+            val notification = NotificationCompat.Builder(appContext, channelId)
+                .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                .setContentTitle("ALERTA DE EMERGENCIA SOS RECIBIDA")
+                .setContentText(body)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .build()
+
+            notificationManager.notify(beacon.senderDeviceIdHex.hashCode(), notification)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error triggering emergency notification: ${e.message}")
         }
     }
 

@@ -115,7 +115,11 @@ class EmergencyBeaconService : Service() {
         startForeground(NOTIFICATION_ID, notification)
 
         acquireWakeLock()
+        
+        // Maximize BLE advertising priority and start mesh service
         PowerManager.getInstance(this)
+        val bleService = com.bitchat.android.service.MeshServiceHolder.getOrCreate(this)
+        bleService.startServices()
 
         beaconLoopJob = serviceScope.launch {
             Log.i(TAG, "Emergency SOS beacon active. Starting continuous broadcast loop.")
@@ -125,7 +129,7 @@ class EmergencyBeaconService : Service() {
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in SOS beacon broadcast loop: ${e.message}")
                 }
-                delay(30_000L) // Broadcast every 30 seconds
+                delay(15_000L) // Broadcast every 15 seconds for faster disaster discovery
             }
         }
     }
