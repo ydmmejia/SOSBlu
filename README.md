@@ -26,7 +26,22 @@
 
 **SOSBlu** es una plataforma móvil de telecomunicaciones de emergencia diseñada para el rescate de víctimas atrapadas tras desastres naturales (terremotos, colapsos estructurales, deslaves) en escenarios con colapso total de infraestructura celular e internet.
 
-La aplicación transforma cada dispositivo Android en un transceptor de la red malla Bluetooth Low Energy (BLE). Permite a las víctimas emitir un faro de auxilio continuo (`SOS_BEACON`) con un solo toque. La señal se propaga de forma salto-a-salto (hasta 20 saltos) a través de otros teléfonos cercanos hasta alcanzar a brigadistas de rescate o un nodo puente (*Gateway*) con enlace a internet.
+La aplicación transforma cada dispositivo Android en un transceptor de la red malla Bluetooth Low Energy (BLE). Permite a las víctimas emitir un faro de auxilio continuo (`SOS_BEACON`) con un solo toque. La señal se propaga de forma salto-a-salto a través de otros teléfonos cercanos hasta alcanzar a personas o brigadistas de rescate.
+
+---
+
+## Guía de Instalación en Android y Advertencia de Seguridad
+
+> [!IMPORTANT]
+> **¿Por qué Android muestra una advertencia al instalar?**  
+> Al descargar e instalar **SOSBlu** directamente desde GitHub (fuera de Google Play Store), el sistema Android mostrará un aviso de seguridad estándar (*"Aplicación de fuente desconocida"* o *"Play Protect: Aplicación no reconocida"*).  
+> **Esto es 100% normal** en aplicaciones independientes de código abierto distribuidas en archivo `.apk`.
+
+### Pasos para Instalar en 3 Segundos:
+1. Al descargar el archivo `SOSBlu-v1.0.0.apk`, abre la notificación de descarga o la carpeta **Descargas**.
+2. Si Android bloquea la instalación inicial, toca en **"Configuración"** / **"Ajustes"** y activa la casilla **"Permitir desde esta fuente"**.
+3. Si Play Protect muestra una ventana de aviso, toca en **"Más detalles"** y selecciona **"Instalar de todas formas"**.
+4. Abre **SOSBlu** y concede los permisos de Bluetooth y Ubicación para dejar la aplicación lista.
 
 ---
 
@@ -51,22 +66,17 @@ La aplicación transforma cada dispositivo Android en un transceptor de la red m
 - Quinto perfil de energía diseñado para escenarios de supervivencia.
 - Maximiza la potencia y prioridad de los anuncios BLE mientras suspende animaciones, sincronizaciones en segundo plano y procesamiento innecesario para extender la transmisión continua hasta por 48-72 horas según el estado de la batería.
 
-### 4. Triangulación Táctica por Señal RSSI
+### 4. Medición por Intensidad de Señal BLE (dBm)
 - En colapsos de estructuras donde los receptores GPS no obtienen fijación satelital, la señal conmuta automáticamente al modo `NO_GPS_RSSI_ONLY`.
-- La pantalla de rescate calcula la atenuación de potencia de la señal recibida (RSSI en dBm) para guiara los equipos de búsqueda por proximidad física (Menos de 5m, 5-15m, Distante).
-
-### 5. Nodo Puente / Gateway Automático (`BridgeRelayService`)
-- Monitorea la conectividad de red del dispositivo mediante `ConnectivityManager`.
-- Al detectar enlace a internet (Wi-Fi, satelital o celular reactivado), serializa automáticamente los beacons recibidos en la malla local a un payload JSON estandarizado y los retransmite por HTTPS a la central de gestión de emergencias.
-- Implementa filtros de deduplicación basados en firmas de tiempo e identificadores para evitar sobrecargas de red.
+- La pantalla de alertas mide la atenuación de potencia de la señal recibida (RSSI en dBm) para guiar a los equipos de búsqueda por proximidad física (Señal Muy Fuerte, Media, Débil).
 
 ---
 
 ## Interfaz de Usuario y Usabilidad
 
-- **Operación de Un Solo Toque**: Al abrir **SOSBlu**, la pantalla principal muestra directamente el botón gigante de activación de auxilio de 230dp en color rojo de emergencia.
-- **Cero Emojis**: La interfaz sigue un estándar sobrio, técnico y clínico en Material Design 3, adecuado para agencias de defensa civil y equipos de rescate.
-- **Separación de Funciones**: El canal de texto auxiliar en malla se mantiene desacoplado en un botón secundario para evitar distracciones en situaciones de pánico.
+- **Operación de Un Solo Toque**: Al abrir **SOSBlu**, la pantalla principal muestra directamente el botón gigante de activación de auxilio en color rojo de emergencia.
+- **Cero Emojis**: La interfaz sigue un estándar sobrio, técnico y clínico en Material Design 3 en español neutro.
+- **Conmutador de Tema Claro / Oscuro**: Opción directa en la barra superior para cambiar entre tema oscuro táctico y tema claro clínico.
 
 ---
 
@@ -79,7 +89,7 @@ app/src/main/java/com/bitchat/android/
 │   └── SOSBeaconPayload.kt      [Serializador binario de faro de emergencia]
 ├── services/
 │   ├── EmergencyBeaconService.kt[Servicio foreground con WakeLock para emisión SOS]
-│   └── BridgeRelayService.kt   [Recolector, deduplicador y transmisor a Gateway HTTPS]
+│   └── BridgeRelayService.kt   [Recolector y deduplicador de alertas de red malla]
 ├── mesh/
 │   ├── BluetoothMeshService.kt [Coordinador core de radio BLE]
 │   ├── PacketRelayManager.kt   [Enrutador QoS con prioridad incondicional para SOS]
@@ -101,8 +111,8 @@ app/src/main/java/com/bitchat/android/
 ### Compilación del APK
 
 ```sh
-git clone https://github.com/permissionlesstech/bitchat-android.git
-cd bitchat-android
+git clone https://github.com/ydmmejia/SOSBlu.git
+cd SOSBlu
 ./gradlew :app:assembleDebug --dependency-verification=off --no-daemon
 ```
 
@@ -110,12 +120,6 @@ cd bitchat-android
 
 ```text
 app/build/outputs/apk/debug/app-universal-debug.apk
-```
-
-### Instalación vía ADB
-
-```sh
-adb install -r app/build/outputs/apk/debug/app-universal-debug.apk
 ```
 
 ---

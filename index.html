@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SOSBlu — Red de Auxilio Celular sin Internet</title>
-  <meta name="description" content="Plataforma móvil de emergencia y auxilio offline para terremotos y rescate mediante red malla Bluetooth.">
+  <meta name="description" content="Plataforma móvil de emergencia y auxilio offline para terremotos mediante red malla Bluetooth de celular a celular.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,9 @@
       --red: #e53935;
       --red-hover: #c62828;
       --green: #00e676;
-      --blue-accent: #3b82f6;
+      --warning-bg: #1c1917;
+      --warning-border: #78350f;
+      --warning-text: #fef3c7;
       --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
@@ -44,7 +46,6 @@
       padding: 0 24px;
     }
 
-    /* Header Navbar */
     header {
       border-bottom: 1px solid var(--border);
       padding: 20px 0;
@@ -118,7 +119,6 @@
       background-color: var(--surface-hover);
     }
 
-    /* Hero Section */
     .hero-grid {
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
@@ -210,7 +210,6 @@
       background-color: var(--surface-hover);
     }
 
-    /* Simulation Preview Card */
     .preview-card {
       background-color: var(--surface);
       border: 1px solid var(--border-light);
@@ -288,7 +287,6 @@
       color: var(--text);
     }
 
-    /* Section Styling */
     .section {
       padding: 80px 0;
       border-top: 1px solid var(--border);
@@ -312,7 +310,6 @@
       color: var(--text-muted);
     }
 
-    /* Feature Grid */
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -324,7 +321,7 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 32px;
-      transition: all 0.25 ease;
+      transition: all 0.25s ease;
     }
 
     .card:hover {
@@ -361,7 +358,6 @@
       line-height: 1.6;
     }
 
-    /* Step Cards */
     .steps-wrapper {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -395,7 +391,6 @@
       color: var(--text-muted);
     }
 
-    /* Download Banner Box */
     .download-box {
       background-color: var(--surface);
       border: 1px solid var(--border-light);
@@ -427,13 +422,48 @@
       font-size: 0.85rem;
       color: var(--text-muted);
       margin-bottom: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .file-info strong {
       color: var(--text);
     }
 
-    /* Footer */
+    /* Notice Card for Play Protect */
+    .notice-card {
+      max-width: 720px;
+      margin: 28px auto 0 auto;
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: left;
+    }
+
+    .notice-header {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notice-card p {
+      font-size: 0.92rem;
+      color: var(--warning-text);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .notice-card p:last-child {
+      margin-bottom: 0;
+    }
+
     footer {
       border-top: 1px solid var(--border);
       padding: 40px 0;
@@ -482,7 +512,7 @@
         </div>
         <h1 class="hero-title">Auxilio Celular <span>Offline</span> para Terremotos</h1>
         <p class="hero-desc">
-          SOSBlu transforma teléfonos Android en transceptores de emergencia de bajo consumo. Permite transmitir señales de auxilio salto-a-salto cuando las antenas celulares y el internet colapsan tras un desastre.
+          SOSBlu transforma teléfonos Android en transceptores de emergencia de bajo consumo. Permite transmitir señales de auxilio salto-a-salto entre celulares cercanos cuando las antenas telefónicas colapsan.
         </p>
         <div class="btn-group">
           <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.0.0/SOSBlu-v1.0.0.apk" class="btn-main">
@@ -498,7 +528,7 @@
       <div class="preview-card">
         <div class="preview-header">
           <span class="preview-title">Consola de Emergencia</span>
-          <span style="color: var(--green); font-size: 0.8rem; font-weight: 700;">● MESH LISTO</span>
+          <span style="color: var(--green); font-size: 0.8rem; font-weight: 700;">● MALLA LOCAL ACTIVA</span>
         </div>
         
         <div class="sos-circle">
@@ -509,15 +539,15 @@
         <div class="preview-stats">
           <div class="stat-box">
             <div class="stat-label">CANAL DE TRANSMISIÓN</div>
-            <div class="stat-val">BLE Mesh Multi-hop</div>
+            <div class="stat-val">BLE Mesh Celular a Celular</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">AUTONOMÍA ESTIMADA</div>
             <div class="stat-val">48-72 Horas</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">TRIANGULACIÓN</div>
-            <div class="stat-val">Potencia RSSI</div>
+            <div class="stat-label">INTENSIDAD DE SEÑAL</div>
+            <div class="stat-val">Medición BLE (dBm)</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">SEGURIDAD</div>
@@ -532,45 +562,45 @@
   <section class="section">
     <div class="container">
       <div class="section-head">
-        <h2>Arquitectura y Capacidades Tácticas</h2>
-        <p>Diseñada para salvar vidas en escenarios con pérdida total de servicios de energía y telecomunicaciones.</p>
+        <h2>Especificaciones del Sistema</h2>
+        <p>Arquitectura técnica enfocada en supervivencia y comunicación de emergencia</p>
       </div>
 
       <div class="grid-3">
         <div class="card">
           <div class="card-num">01</div>
           <h3>100% Funcional sin Internet</h3>
-          <p>No depende de redes celulares, datos ni Wi-Fi. Utiliza protocolos Bluetooth Low Energy (BLE Mesh) para enlazar celulares salto-a-salto hasta alcanzar auxilio.</p>
+          <p>No depende de redes celulares ni datos móviles. Utiliza Bluetooth Low Energy (BLE Mesh) para enlazar celulares salto-a-salto entre personas cercanas.</p>
         </div>
 
         <div class="card">
           <div class="card-num">02</div>
           <h3>Activación SOS de 1 Toque</h3>
-          <p>Sin menús complicados. La pantalla principal presenta directamente un botón gigante de auxilio para actuar rápido en situaciones de pánico o atrapamiento.</p>
+          <p>Interfaz limpia sin menús complejos ni distracciones. Un toque activa la emisión continua del faro de auxilio en segundo plano.</p>
         </div>
 
         <div class="card">
           <div class="card-num">03</div>
-          <h3>Triangulación RSSI para Escombros</h3>
-          <p>Mide la atenuación de potencia de la señal recibida (RSSI en dBm) para guiar a brigadistas y rescatistas hacia la ubicación física de víctimas incluso sin señal GPS.</p>
+          <h3>Medición de Intensidad BLE (dBm)</h3>
+          <p>Muestra la potencia de señal recibida en tiempo real (dBm) clasificándola en rangos (Cerca, Media, Distante) para ayudar a ubicar personas.</p>
         </div>
 
         <div class="card">
           <div class="card-num">04</div>
           <h3>Alertas Sonoras y Vibración</h3>
-          <p>Dispara notificaciones de alta prioridad con sonido de alarma y patrones de vibración intensos en los teléfonos receptores para alertar a brigadas de socorro.</p>
+          <p>Genera notificaciones con sonido prioritario y vibración intensa en los teléfonos receptores para avisar sobre señales de auxilio en la zona.</p>
         </div>
 
         <div class="card">
           <div class="card-num">05</div>
           <h3>Firma Criptográfica Asimétrica</h3>
-          <p>Cada faro de emergencia se transmite firmado con criptografía asimétrica Ed25519 usando la clave persistente del dispositivo para prevenir señales falsas.</p>
+          <p>Cada faro de emergencia se transmite firmado con criptografía asimétrica Ed25519 usando la clave del dispositivo para prevenir manipulaciones.</p>
         </div>
 
         <div class="card">
           <div class="card-num">06</div>
           <h3>Modo de Batería SOS Ultra</h3>
-          <p>Optimiza la frecuencia de transmisión BLE y suspende procesos secundarios, extendiendo la emisión del faro de auxilio continuo hasta por 72 horas.</p>
+          <p>Optimiza la frecuencia de transmisión BLE y suspende procesos secundarios, extendiendo la emisión del faro continuo hasta por 72 horas.</p>
         </div>
       </div>
     </div>
@@ -581,26 +611,26 @@
     <div class="container">
       <div class="section-head">
         <h2>Instalación en 3 Pasos</h2>
-        <p>Preparación simple antes de cualquier evento sísmico o emergencia</p>
+        <p>Preparación rápida antes de cualquier evento sísmico o emergencia</p>
       </div>
 
       <div class="steps-wrapper">
         <div class="step-card">
           <div class="step-badge">Paso 01</div>
           <h4>Descargar APK</h4>
-          <p>Descarga el paquete ejecutable oficial `SOSBlu-v1.0.0.apk` directamente en tu dispositivo Android.</p>
+          <p>Descarga el ejecutable oficial `SOSBlu-v1.0.0.apk` directamente en tu dispositivo Android.</p>
         </div>
 
         <div class="step-card">
           <div class="step-badge">Paso 02</div>
           <h4>Activar Sensores</h4>
-          <p>Mantén activados los interruptores de Bluetooth y Ubicación en la barra de tu teléfono Android.</p>
+          <p>Mantén activados los interruptores de Bluetooth y Ubicación en tu teléfono Android.</p>
         </div>
 
         <div class="step-card">
           <div class="step-badge">Paso 03</div>
           <h4>Preparado para Auxilio</h4>
-          <p>La aplicación queda lista para emitir tu faro de auxilio o recibir alertas de personas en riesgo.</p>
+          <p>La aplicación queda lista para emitir tu faro de auxilio o recibir alertas de dispositivos cercanos.</p>
         </div>
       </div>
 
@@ -620,6 +650,20 @@
             Descargar APK para Android
           </a>
         </div>
+
+        <!-- Play Protect Reassurance Notice -->
+        <div class="notice-card">
+          <div class="notice-header">
+            NOTA IMPORTANTE DE INSTALACIÓN EN ANDROID (PLAY PROTECT)
+          </div>
+          <p>
+            Al instalar <strong>SOSBlu</strong> fuera de Google Play Store, Android mostrará un aviso de seguridad estándar (<em>"Aplicación de fuente desconocida"</em> o <em>"Play Protect no reconoce el desarrollador"</em>).
+          </p>
+          <p>
+            <strong>Esto es 100% normal en proyectos independientes de código abierto (.apk).</strong> Para instalarla sin problemas: si ves el aviso de Play Protect, toca en <strong>"Más detalles"</strong> y luego en <strong>"Instalar de todas formas"</strong> (o activa <em>"Permitir desde esta fuente"</em>).
+          </p>
+        </div>
+
       </div>
     </div>
   </section>
