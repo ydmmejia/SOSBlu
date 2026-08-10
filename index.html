@@ -4,23 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SOSBlu — Red de Auxilio Celular sin Internet</title>
-  <meta name="description" content="Plataforma móvil de telecomunicaciones de emergencia y auxilio offline para terremotos y colapsos de red.">
+  <meta name="description" content="Plataforma móvil de emergencia y auxilio offline para terremotos y rescate mediante red malla Bluetooth.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --card-border: #30363d;
-      --text-main: #f0f6fc;
-      --text-muted: #8b949e;
-      --accent-red: #d32f2f;
-      --accent-red-hover: #b71c1c;
-      --accent-green: #2ea043;
-      --btn-secondary-bg: #21262d;
-      --btn-secondary-hover: #30363d;
-      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --bg: #07090e;
+      --surface: #0f141f;
+      --surface-hover: #161d2d;
+      --border: #1e2638;
+      --border-light: #2c374e;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --red: #e53935;
+      --red-hover: #c62828;
+      --green: #00e676;
+      --blue-accent: #3b82f6;
+      --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
     * {
@@ -30,376 +31,594 @@
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: var(--font-family);
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 1080px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
     /* Header Navbar */
     header {
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border);
       padding: 20px 0;
+      background-color: rgba(7, 9, 14, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
     }
 
-    .nav-wrapper {
+    .nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand {
+    .logo-group {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 1.4rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background-color: var(--red);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .logo-text {
+      font-size: 1.35rem;
       font-weight: 800;
       letter-spacing: -0.5px;
-      color: var(--text-main);
+      color: var(--text);
       text-decoration: none;
     }
 
-    .brand-badge {
-      background-color: var(--accent-red);
-      color: #ffffff;
-      font-size: 0.75rem;
+    .tag-badge {
+      background-color: rgba(229, 57, 53, 0.15);
+      color: #ff5252;
+      border: 1px solid rgba(229, 57, 53, 0.4);
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .nav-links a {
+    .nav-btn {
       color: var(--text-muted);
       text-decoration: none;
       font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 0.2s ease;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      transition: all 0.2s ease;
     }
 
-    .nav-links a:hover {
-      color: var(--text-main);
+    .nav-btn:hover {
+      color: var(--text);
+      border-color: var(--border-light);
+      background-color: var(--surface-hover);
     }
 
     /* Hero Section */
-    .hero {
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 48px;
+      align-items: center;
       padding: 80px 0 60px 0;
-      text-align: center;
     }
 
-    .hero-tag {
-      display: inline-block;
-      background-color: #1f293d;
-      color: #58a6ff;
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(0, 230, 118, 0.1);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      color: var(--green);
       font-size: 0.85rem;
       font-weight: 600;
       padding: 6px 14px;
       border-radius: 20px;
-      border: 1px solid #1f3a5f;
       margin-bottom: 24px;
     }
 
-    .hero h1 {
-      font-size: 3.2rem;
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--green);
+      border-radius: 50%;
+    }
+
+    .hero-title {
+      font-size: 3.4rem;
       font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -1px;
-      margin-bottom: 20px;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
     }
 
-    .hero p {
-      font-size: 1.25rem;
+    .hero-title span {
+      color: var(--red);
+    }
+
+    .hero-desc {
+      font-size: 1.2rem;
       color: var(--text-muted);
-      max-width: 760px;
-      margin: 0 auto 36px auto;
-      font-weight: 400;
+      margin-bottom: 36px;
+      line-height: 1.6;
     }
 
-    .cta-group {
+    .btn-group {
       display: flex;
       gap: 16px;
-      justify-content: center;
       flex-wrap: wrap;
     }
 
-    .btn {
+    .btn-main {
+      background-color: var(--red);
+      color: #ffffff;
+      padding: 16px 32px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      padding: 14px 28px;
-      font-size: 1rem;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-main:hover {
+      background-color: var(--red-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background-color: var(--surface);
+      color: var(--text);
+      padding: 16px 28px;
+      font-size: 1.05rem;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
     }
 
-    .btn-primary {
-      background-color: var(--accent-red);
-      color: #ffffff;
-      border: 1px solid var(--accent-red);
+    .btn-outline:hover {
+      border-color: var(--border-light);
+      background-color: var(--surface-hover);
     }
 
-    .btn-primary:hover {
-      background-color: var(--accent-red-hover);
-      border-color: var(--accent-red-hover);
-    }
-
-    .btn-secondary {
-      background-color: var(--btn-secondary-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-    }
-
-    .btn-secondary:hover {
-      background-color: var(--btn-secondary-hover);
-    }
-
-    /* Grid Features */
-    .features-section {
-      padding: 60px 0;
-      border-top: 1px solid var(--card-border);
-    }
-
-    .section-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
-    }
-
-    .section-subtitle {
-      font-size: 1rem;
-      color: var(--text-muted);
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-    }
-
-    .feature-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
+    /* Simulation Preview Card */
+    .preview-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
       padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
 
-    .feature-icon-box {
-      width: 44px;
-      height: 44px;
-      background-color: #21262d;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
+    .preview-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
     }
 
-    .feature-card h3 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    .feature-card p {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* Steps Section */
-    .steps-section {
-      padding: 60px 0 80px 0;
-      border-top: 1px solid var(--card-border);
-    }
-
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      margin-top: 40px;
-    }
-
-    .step-item {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 24px;
-    }
-
-    .step-number {
+    .preview-title {
       font-size: 0.9rem;
       font-weight: 700;
-      color: var(--accent-green);
-      margin-bottom: 12px;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .step-item h4 {
-      font-size: 1.1rem;
+    .sos-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background-color: var(--red);
+      margin: 0 auto 24px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 0 0 12px rgba(229, 57, 53, 0.2);
+    }
+
+    .sos-circle-text {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .sos-circle-sub {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .preview-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-box {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
       font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Section Styling */
+    .section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-head {
+      text-align: center;
+      max-width: 650px;
+      margin: 0 auto 56px auto;
+    }
+
+    .section-head h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 12px;
+    }
+
+    .section-head p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+
+    /* Feature Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      transition: all 0.25 ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-light);
+      background-color: var(--surface-hover);
+      transform: translateY(-4px);
+    }
+
+    .card-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Step Cards */
+    .steps-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .step-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    .step-badge {
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .step-card h4 {
+      font-size: 1.15rem;
+      font-weight: 700;
       margin-bottom: 8px;
     }
 
-    .step-item p {
-      font-size: 0.9rem;
+    .step-card p {
+      font-size: 0.92rem;
       color: var(--text-muted);
+    }
+
+    /* Download Banner Box */
+    .download-box {
+      background-color: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .download-box h3 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .download-box p {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-size: 1.05rem;
+    }
+
+    .file-info {
+      display: inline-flex;
+      gap: 20px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .file-info strong {
+      color: var(--text);
     }
 
     /* Footer */
     footer {
-      border-top: 1px solid var(--card-border);
-      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
       text-align: center;
       color: var(--text-muted);
       font-size: 0.9rem;
     }
 
     footer a {
-      color: var(--text-muted);
+      color: var(--text);
       text-decoration: underline;
     }
 
-    footer a:hover {
-      color: var(--text-main);
-    }
-
-    @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2.2rem;
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        padding: 40px 0;
       }
-      .hero p {
-        font-size: 1.05rem;
-      }
-      .cta-group {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
+      .hero-title {
+        font-size: 2.5rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Navigation -->
   <header>
-    <div class="container nav-wrapper">
-      <a href="#" class="brand">
-        SOSBlu
-        <span class="brand-badge">OFICIAL</span>
-      </a>
-      <nav class="nav-links">
-        <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener">GitHub Repo</a>
-      </nav>
+    <div class="container nav">
+      <div class="logo-group">
+        <div class="logo-icon">SOS</div>
+        <a href="#" class="logo-text">SOSBlu</a>
+        <span class="tag-badge">Edición Rescate</span>
+      </div>
+      <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener" class="nav-btn">GitHub</a>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-tag">RED MESH BLUETOOTH OFF-GRID</div>
-      <h1>Red de Auxilio Celular sin Internet para Emergencias</h1>
-      <p>
-        SOSBlu transforma cada teléfono Android en un transceptor de emergencia de bajo consumo. Diseñada para salvar vidas tras sismos y colapsos de infraestructura celular.
-      </p>
+  <section class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-pill">
+          <span class="status-dot"></span>
+          Red Malla Bluetooth Activa (Sin Internet)
+        </div>
+        <h1 class="hero-title">Auxilio Celular <span>Offline</span> para Terremotos</h1>
+        <p class="hero-desc">
+          SOSBlu transforma teléfonos Android en transceptores de emergencia de bajo consumo. Permite transmitir señales de auxilio salto-a-salto cuando las antenas celulares y el internet colapsan tras un desastre.
+        </p>
+        <div class="btn-group">
+          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.0.0/SOSBlu-v1.0.0.apk" class="btn-main">
+            Descargar APK v1.0.0
+          </a>
+          <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener" class="btn-outline">
+            Código en GitHub
+          </a>
+        </div>
+      </div>
 
-      <div class="cta-group">
-        <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.0.0/SOSBlu-v1.0.0.apk" class="btn btn-primary">
-          Descargar APK v1.0.0
-        </a>
-        <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener" class="btn btn-secondary">
-          Ver Código en GitHub
-        </a>
+      <!-- Tactical Preview Card -->
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-title">Consola de Emergencia</span>
+          <span style="color: var(--green); font-size: 0.8rem; font-weight: 700;">● MESH LISTO</span>
+        </div>
+        
+        <div class="sos-circle">
+          <div class="sos-circle-text">SOS</div>
+          <div class="sos-circle-sub">1 Toque</div>
+        </div>
+
+        <div class="preview-stats">
+          <div class="stat-box">
+            <div class="stat-label">CANAL DE TRANSMISIÓN</div>
+            <div class="stat-val">BLE Mesh Multi-hop</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">AUTONOMÍA ESTIMADA</div>
+            <div class="stat-val">48-72 Horas</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">TRIANGULACIÓN</div>
+            <div class="stat-val">Potencia RSSI</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">SEGURIDAD</div>
+            <div class="stat-val">Firma Ed25519</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section class="features-section">
+  <section class="section">
     <div class="container">
-      <h2 class="section-title">Especificaciones del Sistema</h2>
-      <p class="section-subtitle">Arquitectura técnica enfocada en supervivencia y rescate</p>
+      <div class="section-head">
+        <h2>Arquitectura y Capacidades Tácticas</h2>
+        <p>Diseñada para salvar vidas en escenarios con pérdida total de servicios de energía y telecomunicaciones.</p>
+      </div>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-box">01</div>
-          <h3>100% Offline (BLE Mesh)</h3>
-          <p>
-            No requiere señal celular ni conexión a internet. Transmite señales de auxilio de celular a celular de forma salto-a-salto hasta alcanzar rescate.
-          </p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-num">01</div>
+          <h3>100% Funcional sin Internet</h3>
+          <p>No depende de redes celulares, datos ni Wi-Fi. Utiliza protocolos Bluetooth Low Energy (BLE Mesh) para enlazar celulares salto-a-salto hasta alcanzar auxilio.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon-box">02</div>
-          <h3>Activación de 1 Solo Toque</h3>
-          <p>
-            Interfaz de usuario táctica de alta visibilidad sin menús complejos ni distracciones. Un toque activa la emisión del faro SOS continuo.
-          </p>
+        <div class="card">
+          <div class="card-num">02</div>
+          <h3>Activación SOS de 1 Toque</h3>
+          <p>Sin menús complicados. La pantalla principal presenta directamente un botón gigante de auxilio para actuar rápido en situaciones de pánico o atrapamiento.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon-box">03</div>
-          <h3>Localización por Señal (RSSI)</h3>
-          <p>
-            Permite a los brigadistas estimar la proximidad física de personas bajo escombros midiendo la potencia de la señal recibida incluso sin fijación GPS.
-          </p>
+        <div class="card">
+          <div class="card-num">03</div>
+          <h3>Triangulación RSSI para Escombros</h3>
+          <p>Mide la atenuación de potencia de la señal recibida (RSSI en dBm) para guiar a brigadistas y rescatistas hacia la ubicación física de víctimas incluso sin señal GPS.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon-box">04</div>
-          <h3>Alertas Sonoras de Prioridad</h3>
-          <p>
-            Genera alertas de alta prioridad con sonido y vibración en los teléfonos receptores para avisar de inmediato a rescatistas cercanos.
-          </p>
+        <div class="card">
+          <div class="card-num">04</div>
+          <h3>Alertas Sonoras y Vibración</h3>
+          <p>Dispara notificaciones de alta prioridad con sonido de alarma y patrones de vibración intensos en los teléfonos receptores para alertar a brigadas de socorro.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-num">05</div>
+          <h3>Firma Criptográfica Asimétrica</h3>
+          <p>Cada faro de emergencia se transmite firmado con criptografía asimétrica Ed25519 usando la clave persistente del dispositivo para prevenir señales falsas.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-num">06</div>
+          <h3>Modo de Batería SOS Ultra</h3>
+          <p>Optimiza la frecuencia de transmisión BLE y suspende procesos secundarios, extendiendo la emisión del faro de auxilio continuo hasta por 72 horas.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Steps Section -->
-  <section class="steps-section">
+  <section class="section">
     <div class="container">
-      <h2 class="section-title">Instalación en 3 Pasos</h2>
-      <p class="section-subtitle">Preparación rápida antes de cualquier evento sísmico</p>
+      <div class="section-head">
+        <h2>Instalación en 3 Pasos</h2>
+        <p>Preparación simple antes de cualquier evento sísmico o emergencia</p>
+      </div>
 
-      <div class="steps-grid">
-        <div class="step-item">
-          <div class="step-number">Paso 01</div>
+      <div class="steps-wrapper">
+        <div class="step-card">
+          <div class="step-badge">Paso 01</div>
           <h4>Descargar APK</h4>
-          <p>Descarga el ejecutable oficial `SOSBlu-v1.0.0.apk` directamente en tu dispositivo Android.</p>
+          <p>Descarga el paquete ejecutable oficial `SOSBlu-v1.0.0.apk` directamente en tu dispositivo Android.</p>
         </div>
 
-        <div class="step-item">
-          <div class="step-number">Paso 02</div>
+        <div class="step-card">
+          <div class="step-badge">Paso 02</div>
           <h4>Activar Sensores</h4>
-          <p>Mantén activados los interruptores de Bluetooth y Ubicación en la barra de tu teléfono.</p>
+          <p>Mantén activados los interruptores de Bluetooth y Ubicación en la barra de tu teléfono Android.</p>
         </div>
 
-        <div class="step-item">
-          <div class="step-number">Paso 03</div>
-          <h4>Listo para Emergencias</h4>
-          <p>La aplicación ya queda lista para transmitir o recibir faros de auxilio en cualquier momento.</p>
+        <div class="step-card">
+          <div class="step-badge">Paso 03</div>
+          <h4>Preparado para Auxilio</h4>
+          <p>La aplicación queda lista para emitir tu faro de auxilio o recibir alertas de personas en riesgo.</p>
+        </div>
+      </div>
+
+      <!-- Download Banner Box -->
+      <div class="download-box">
+        <h3>Descarga SOSBlu Oficial</h3>
+        <p>Aplicación de auxilio de código abierto. Gratuita para toda la comunidad.</p>
+        
+        <div class="file-info">
+          <span>Archivo: <strong>SOSBlu-v1.0.0.apk</strong></span>
+          <span>Tamaño: <strong>78.6 MB</strong></span>
+          <span>Requisito: <strong>Android 8.0+</strong></span>
+        </div>
+
+        <div>
+          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.0.0/SOSBlu-v1.0.0.apk" class="btn-main">
+            Descargar APK para Android
+          </a>
         </div>
       </div>
     </div>
