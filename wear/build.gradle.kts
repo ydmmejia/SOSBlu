@@ -82,6 +82,8 @@ val sharedSourceIncludes = listOf(
     "com/bitchat/android/services/PrivateMessageArrivalOrder.kt",
     "com/bitchat/android/services/SeenMessageStore.kt",
     "com/bitchat/android/services/VerificationService.kt",
+    "com/bitchat/android/services/BridgeRelayService.kt",
+    "com/bitchat/android/services/EmergencyBeaconService.kt",
     "com/bitchat/android/services/meshgraph/**",
     "com/bitchat/android/service/TransportBridgeService.kt",
     "com/bitchat/android/nostr/Bech32.kt",

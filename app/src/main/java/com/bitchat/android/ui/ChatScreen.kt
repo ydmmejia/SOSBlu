@@ -94,6 +94,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
     var selectedUserForSheet by remember { mutableStateOf("") }
     var selectedMessageForSheet by remember { mutableStateOf<BitchatMessage?>(null) }
     var showFullScreenImageViewer by remember { mutableStateOf(false) }
+    var showEmergencyScreen by remember { mutableStateOf(true) }
     var viewerImagePaths by remember { mutableStateOf(emptyList<String>()) }
     var initialViewerIndex by remember { mutableStateOf(0) }
     var forceScrollToBottom by remember { mutableStateOf(false) }
@@ -462,7 +463,8 @@ fun ChatScreen(viewModel: ChatViewModel) {
             onLocationNotesClick = {
                 nearbyNotesController.reveal()
                 showLocationNotesSheet = true
-            }
+            },
+            onEmergencyClick = { showEmergencyScreen = true }
         )
 
         // Scroll-to-bottom floating button
@@ -511,6 +513,10 @@ fun ChatScreen(viewModel: ChatViewModel) {
             initialIndex = initialViewerIndex,
             onClose = { showFullScreenImageViewer = false }
         )
+    }
+
+    if (showEmergencyScreen) {
+        EmergencyScreen(onBack = { showEmergencyScreen = false })
     }
 
     // Dialogs and Sheets
@@ -761,7 +767,8 @@ private fun ChatFloatingHeader(
     onShowAppInfo: () -> Unit,
     onPanicClear: () -> Unit,
     onLocationChannelsClick: () -> Unit,
-    onLocationNotesClick: () -> Unit
+    onLocationNotesClick: () -> Unit,
+    onEmergencyClick: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val locationManager = remember { com.bitchat.android.geohash.LocationChannelManager.getInstance(context) }
@@ -806,7 +813,8 @@ private fun ChatFloatingHeader(
                 // Ensure location is loaded before showing sheet
                 locationManager.refreshChannels()
                 onLocationNotesClick()
-            }
+            },
+            onEmergencyClick = onEmergencyClick
         )
     }
 }

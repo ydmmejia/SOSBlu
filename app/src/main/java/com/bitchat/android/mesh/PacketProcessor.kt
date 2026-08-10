@@ -140,6 +140,7 @@ class PacketProcessor(private val myPeerID: String) {
             MessageType.LEAVE -> handleLeave(routed)
             MessageType.FRAGMENT -> handleFragment(routed)
             MessageType.REQUEST_SYNC -> handleRequestSync(routed)
+            MessageType.SOS_BEACON -> validPacket = delegate?.handleSOSBeacon(routed) ?: false
             else -> {
                 // Handle private packet types (address check required)
                 if (packetRelayManager.isPacketAddressedToMe(packet)) {
@@ -298,6 +299,7 @@ interface PacketProcessorDelegate {
     suspend fun handleAnnounce(routed: RoutedPacket): Boolean
     fun handleMessage(routed: RoutedPacket)
     fun handleVoiceFrame(routed: RoutedPacket): Boolean = false
+    fun handleSOSBeacon(routed: RoutedPacket): Boolean = false
     fun handleLeave(routed: RoutedPacket)
     fun handleFragment(packet: BitchatPacket): BitchatPacket?
     fun handleRequestSync(routed: RoutedPacket)

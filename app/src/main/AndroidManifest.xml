@@ -137,6 +137,13 @@
             tools:ignore="DataExtractionRules">
         </service>
 
+        <!-- Continuous emergency SOS beacon service -->
+        <service
+            android:name=".services.EmergencyBeaconService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice|location"
+            tools:ignore="DataExtractionRules" />
+
         <receiver
             android:name=".service.ConversationNotificationReceiver"
             android:enabled="true"

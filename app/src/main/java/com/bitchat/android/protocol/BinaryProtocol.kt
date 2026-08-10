@@ -18,7 +18,8 @@ enum class MessageType(val value: UByte) {
     FRAGMENT(0x20u), // Fragmentation for large packets
     REQUEST_SYNC(0x21u), // GCS-based sync request
     FILE_TRANSFER(0x22u), // New: File transfer packet (BLE voice notes, etc.)
-    VOICE_FRAME(0x29u); // Ephemeral live push-to-talk frame; never added to gossip sync
+    VOICE_FRAME(0x29u), // Ephemeral live push-to-talk frame; never added to gossip sync
+    SOS_BEACON(0x30u); // Unencrypted signed emergency SOS beacon for rescue mesh
 
     companion object {
         fun fromValue(value: UByte): MessageType? {
@@ -478,7 +479,7 @@ object BinaryProtocol {
                 // Security check: Compression bomb protection
                 val ratio = originalSize.toDouble() / compressedSize.toDouble()
                 if (ratio > 50_000.0) {
-                    Log.w("BinaryProtocol", "🚫 Suspicious compression ratio: ${ratio}:1")
+                    Log.w("BinaryProtocol", "Suspicious compression ratio: ${ratio}:1")
                     return null
                 }
                 

@@ -652,7 +652,8 @@ fun ChatHeaderContent(
     onTripleClick: () -> Unit,
     onShowAppInfo: () -> Unit,
     onLocationChannelsClick: () -> Unit,
-    onLocationNotesClick: () -> Unit
+    onLocationNotesClick: () -> Unit,
+    onEmergencyClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -676,6 +677,7 @@ fun ChatHeaderContent(
                 onSidebarClick = onSidebarClick,
                 onLocationChannelsClick = onLocationChannelsClick,
                 onLocationNotesClick = onLocationNotesClick,
+                onEmergencyClick = onEmergencyClick,
                 viewModel = viewModel
             )
         }
@@ -716,6 +718,7 @@ private fun MainHeader(
     onSidebarClick: () -> Unit,
     onLocationChannelsClick: () -> Unit,
     onLocationNotesClick: () -> Unit,
+    onEmergencyClick: () -> Unit,
     viewModel: ChatViewModel
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -817,6 +820,25 @@ private fun MainHeader(
                     onClick = onSidebarClick,
                     showJoinedChannelCount = crowdingMode == HeaderCrowdingMode.Full
                 )
+
+                HeaderIconButton(
+                    onClick = onEmergencyClick,
+                    contentDescription = "EarthquakeMesh Emergency SOS"
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFD32F2F), CircleShape)
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "SOS",
+                            color = Color.White,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
             }
         }
     }

@@ -616,7 +616,12 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
 
             override fun handleVoiceFrame(routed: RoutedPacket): Boolean =
                 messageHandler.handlePublicVoiceFrame(routed)
-            
+
+            override fun handleSOSBeacon(routed: RoutedPacket): Boolean {
+                com.bitchat.android.services.BridgeRelayService.getInstance(context).onSOSBeaconPacketReceived(routed.packet)
+                return true
+            }
+
             override fun handleLeave(routed: RoutedPacket) {
                 serviceScope.launch { messageHandler.handleLeave(routed) }
             }

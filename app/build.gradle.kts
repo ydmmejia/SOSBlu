@@ -112,7 +112,7 @@ android {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
     }

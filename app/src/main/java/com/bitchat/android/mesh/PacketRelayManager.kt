@@ -140,6 +140,12 @@ class PacketRelayManager(private val myPeerID: String) {
      * Determine if we should relay this packet based on type and network conditions
      */
     private fun shouldRelayPacket(packet: BitchatPacket, fromPeerID: String): Boolean {
+        // SOS_BEACON packets must ALWAYS be relayed regardless of network size or TTL drop
+        if (MessageType.fromValue(packet.type) == MessageType.SOS_BEACON) {
+            Log.d(TAG, "Emergency SOS_BEACON packet priority relay")
+            return true
+        }
+
         // Always relay if TTL is high enough (indicates important message)
         if (packet.ttl >= 4u) {
             Log.d(TAG, "High TTL (${packet.ttl}), relaying")
@@ -174,7 +180,7 @@ class PacketRelayManager(private val myPeerID: String) {
      * Actually broadcast the packet for relay
      */
     private fun relayPacket(routed: RoutedPacket) {
-        Log.d(TAG, "🔄 Relaying packet type ${routed.packet.type} with TTL ${routed.packet.ttl}")
+        Log.d(TAG, "Relaying packet type ${routed.packet.type} with TTL ${routed.packet.ttl}")
         delegate?.broadcastPacket(routed)
     }
     

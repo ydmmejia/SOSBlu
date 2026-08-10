@@ -37,7 +37,8 @@ class PowerManager private constructor(context: Context) : LifecycleEventObserve
         PERFORMANCE,
         BALANCED,
         POWER_SAVER,
-        ULTRA_LOW_POWER
+        ULTRA_LOW_POWER,
+        SOS_ULTRA
     }
 
     enum class BatteryBand { NORMAL, LOW, CRITICAL }
@@ -199,7 +200,8 @@ class PowerManager private constructor(context: Context) : LifecycleEventObserve
                 .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
                 .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
             PowerMode.POWER_SAVER,
-            PowerMode.ULTRA_LOW_POWER -> builder
+            PowerMode.ULTRA_LOW_POWER,
+            PowerMode.SOS_ULTRA -> builder
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
                 .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
                 .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
@@ -224,6 +226,10 @@ class PowerManager private constructor(context: Context) : LifecycleEventObserve
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
             .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW)
             .setConnectable(true).setTimeout(0).build()
+        PowerMode.SOS_ULTRA -> AdvertiseSettings.Builder()
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+            .setConnectable(true).setTimeout(0).build()
     }
 
     fun getMaxConnections(): Int = profile.value.ble.maxConnections
@@ -232,7 +238,14 @@ class PowerManager private constructor(context: Context) : LifecycleEventObserve
         PowerMode.PERFORMANCE -> -95
         PowerMode.BALANCED -> -85
         PowerMode.POWER_SAVER -> -75
-        PowerMode.ULTRA_LOW_POWER -> -65
+        PowerMode.ULTRA_LOW_POWER,
+        PowerMode.SOS_ULTRA -> -95 // Max sensitivity for emergency SOS beacons
+    }
+
+    fun estimateRemainingSOSHours(batteryPercent: Int = batteryLevel): Float {
+        // In SOS Ultra mode, average consumption is ~0.8% - 1.2% per hour
+        val burnRatePerHour = 1.0f
+        return (batteryPercent.coerceIn(1, 100) / burnRatePerHour).coerceAtLeast(0.5f)
     }
 
     fun shouldUseDutyCycle(): Boolean = !profile.value.ble.continuousScan

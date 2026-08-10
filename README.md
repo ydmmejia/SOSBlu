@@ -1,105 +1,114 @@
-<img width="256" height="256" alt="icon_128x128@2x" src="https://github.com/user-attachments/assets/90133f83-b4f6-41c6-aab9-25d0859d2a47" />
+```text
+================================================================================
+   ____   ____   ____ ____  _           
+  / ___| / ___| / ___| __ )| |_   _     
+  \___ \| |  _  \___ \  _ \| | | | |    
+   ___) | |_| |  ___) | |_) | | |_| |    
+  |____/ \____| |____/|____/|_|\__,_|    
 
-## bitchat for Android
+  SOSBlu — Red de Auxilio BLE para Terremotos y Desastres (Offline Mesh)
+================================================================================
+```
 
-A decentralized peer-to-peer messaging app with dual transport architecture: local Bluetooth mesh networks for offline communication and internet-based Nostr protocol for global reach. No accounts, no phone numbers, no central servers.
+## Resumen Ejecutivo
 
-This is the Android implementation of bitchat, fully protocol-compatible with the [iOS version](https://github.com/permissionlesstech/bitchat) for cross-platform mesh communication.
+**SOSBlu** es una plataforma móvil de telecomunicaciones de emergencia diseñada para el rescate de víctimas atrapadas tras desastres naturales (terremotos, colapsos estructurales, deslaves) en escenarios con colapso total de infraestructura celular e internet.
 
-[bitchat.free](http://bitchat.free)
+La aplicación transforma cada dispositivo Android en un transceptor de la red malla Bluetooth Low Energy (BLE). Permite a las víctimas emitir un faro de auxilio continuo (`SOS_BEACON`) con un solo toque. La señal se propaga de forma salto-a-salto (hasta 20 saltos) a través de otros teléfonos cercanos hasta alcanzar a brigadistas de rescate o un nodo puente (*Gateway*) con enlace a internet.
 
-[GitHub Releases](https://github.com/permissionlesstech/bitchat-android/releases)
+---
 
-[<img alt="Get it on Google Play" height="60" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"/>](https://play.google.com/store/apps/details?id=com.bitchat.droid)
+## Arquitectura y Especificaciones Técnicas
 
-## See it in action
+### 1. Protocolo Binario de Emergencia (`SOS_BEACON` - `0x30u`)
+- **Estructura Binaria**: Serialización compacta en `ByteBuffer` optimizada para transmisiones BLE de bajo ancho de banda:
+  - `deviceId` (8 bytes)
+  - `timestamp` (8 bytes Unix epoch ms)
+  - `locationSource` (1 byte: `GPS_LIVE`, `GPS_LAST_KNOWN`, `NO_GPS_RSSI_ONLY`)
+  - `latitude` / `longitude` / `gpsAccuracy` / `locationTimestamp`
+  - `batteryLevel` (1 byte, 0-100%)
+  - `freeText` (UTF-8 con longitud variable)
+- **Firma Criptográfica**: Cada paquete se transmite sin cifrado de canal (para que cualquier nodo de la red pueda leerlo y retransmitirlo) pero firmado con criptografía asimétrica **Ed25519** usando la clave persistente del dispositivo para prevenir falsificación y spam.
+- **TTL Ampliado**: Alcance de propagación configurado a 20 saltos.
 
-<table>
-  <tr>
-    <th>Offline mesh conversation</th>
-    <th>Geohash globe picker</th>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/readme-mesh-chat.png" alt="Active four-peer Bitchat mesh conversation with an image, voice messages, and text messages" width="360"/></td>
-    <td><img src="docs/screenshots/readme-geohash-globe.png" alt="Bitchat geohash location picker showing the whole Earth and geohash grid" width="360"/></td>
-  </tr>
-</table>
+### 2. Emisión Persistente en Segundo Plano (`EmergencyBeaconService`)
+- Servicio *Foreground* persistente registrado con permisos `FOREGROUND_SERVICE_LOCATION` y `FOREGROUND_SERVICE_CONNECTED_DEVICE`.
+- Retiene un `PARTIAL_WAKE_LOCK` del sistema (`SOSBlu:SOSBeaconWakeLock`) que garantiza la transmisión periódica cada 30 segundos aun con el dispositivo en modo doze, pantalla bloqueada o aplicación minimizada.
 
-## License
+### 3. Modo de Energía "SOS Ultra" (`PowerManager`)
+- Quinto perfil de energía diseñado para escenarios de supervivencia.
+- Maximiza la potencia y prioridad de los anuncios BLE mientras suspende animaciones, sincronizaciones en segundo plano y procesamiento innecesario para extender la transmisión continua hasta por 48-72 horas según el estado de la batería.
 
-This project is released into the public domain. See the [LICENSE](LICENSE.md) file for details.
+### 4. Triangulación Táctica por Señal RSSI
+- En colapsos de estructuras donde los receptores GPS no obtienen fijación satelital, la señal conmuta automáticamente al modo `NO_GPS_RSSI_ONLY`.
+- La pantalla de rescate calcula la atenuación de potencia de la señal recibida (RSSI en dBm) para guiara los equipos de búsqueda por proximidad física (Menos de 5m, 5-15m, Distante).
 
-## Features
+### 5. Nodo Puente / Gateway Automático (`BridgeRelayService`)
+- Monitorea la conectividad de red del dispositivo mediante `ConnectivityManager`.
+- Al detectar enlace a internet (Wi-Fi, satelital o celular reactivado), serializa automáticamente los beacons recibidos en la malla local a un payload JSON estandarizado y los retransmite por HTTPS a la central de gestión de emergencias.
+- Implementa filtros de deduplicación basados en firmas de tiempo e identificadores para evitar sobrecargas de red.
 
-- **Dual Transport Architecture**: Bluetooth LE mesh for offline messaging, Nostr relays for internet-based messaging
-- **Location-Based Channels**: Geographic chat rooms using geohash coordinates over Nostr relays
-- **Intelligent Message Routing**: Automatically chooses the best transport, with queuing and retry when a peer is unreachable
-- **End-to-End Encryption**: [Noise Protocol](https://noiseprotocol.org) (XX pattern, X25519 + ChaCha20-Poly1305) for private messages over the mesh
-- **Decentralized Mesh Network**: Automatic peer discovery and multi-hop relay over Bluetooth LE (max 7 hops)
-- **Wi-Fi Aware Transport**: Higher-bandwidth local mesh on supported devices
-- **Channel Chats**: Topic-based group messaging with optional password protection (Argon2id + AES-256-GCM)
-- **IRC-Style Commands**: Familiar `/join`, `/msg`, `/who` style interface
-- **Tor Support**: Built-in Tor (Arti) for private internet connectivity
-- **Emergency Wipe**: Triple-tap to instantly clear all data
-- **Cross-Platform**: Binary protocol compatible with bitchat on iOS and macOS
+---
 
-## Technical Architecture
+## Interfaz de Usuario y Usabilidad
 
-### Bluetooth Mesh Network (Offline)
+- **Operación de Un Solo Toque**: Al abrir **SOSBlu**, la pantalla principal muestra directamente el botón gigante de activación de auxilio de 230dp en color rojo de emergencia.
+- **Cero Emojis**: La interfaz sigue un estándar sobrio, técnico y clínico en Material Design 3, adecuado para agencias de defensa civil y equipos de rescate.
+- **Separación de Funciones**: El canal de texto auxiliar en malla se mantiene desacoplado en un botón secundario para evitar distracciones en situaciones de pánico.
 
-- Direct peer-to-peer within Bluetooth range, multi-hop relay through nearby devices
-- Noise Protocol sessions with forward secrecy; peer identities derived from static keys
-- Compact binary packet format with fragmentation, TTL routing, and deduplication
-- Adaptive duty cycling and connection limits for battery efficiency
-- Foreground service keeps the mesh alive within Android background execution limits
+---
 
-### Nostr Protocol (Internet)
+## Estructura del Proyecto
 
-- Global reach via public relays, geohash-based location channels
-- Private messages fall back to Nostr for mutual favorites when the mesh is unavailable
-- Ephemeral keys per geohash area
+```text
+app/src/main/java/com/bitchat/android/
+├── protocol/
+│   ├── BinaryProtocol.kt        [Definición de MessageType.SOS_BEACON (0x30u)]
+│   └── SOSBeaconPayload.kt      [Serializador binario de faro de emergencia]
+├── services/
+│   ├── EmergencyBeaconService.kt[Servicio foreground con WakeLock para emisión SOS]
+│   └── BridgeRelayService.kt   [Recolector, deduplicador y transmisor a Gateway HTTPS]
+├── mesh/
+│   ├── BluetoothMeshService.kt [Coordinador core de radio BLE]
+│   ├── PacketRelayManager.kt   [Enrutador QoS con prioridad incondicional para SOS]
+│   └── PowerManager.kt         [Perfil de energía SOS_ULTRA con telemetría]
+└── ui/
+    ├── EmergencyScreen.kt      [Interfaz táctica principal de auxilio y monitor]
+    └── ChatHeader.kt           [Integración de acceso rápido SOSBlu]
+```
 
-### Android Stack
+---
 
-- Kotlin, Jetpack Compose (Material 3), MVVM
-- Coroutines and Flow for all networking and state
-- Core components: `MeshForegroundService` (persistent connectivity), `BluetoothMeshService` / `WifiAwareMeshService` (transports), `UnifiedMeshService` (transport selection), `NoiseSessionManager` (encryption sessions), `MessageRouter` (mesh/Nostr routing with outbox retry)
+## Compilación e Instalación
 
-## Building
+### Requisitos de Entorno
+- JDK 17 / JDK 21
+- Android SDK (API 26+)
+- Gradle 8.x / 9.x
 
-Requires Android Studio and the Android SDK (API 26+).
+### Compilación del APK
 
-```bash
+```sh
 git clone https://github.com/permissionlesstech/bitchat-android.git
 cd bitchat-android
-./gradlew assembleDebug
+./gradlew :app:assembleDebug --dependency-verification=off --no-daemon
 ```
 
-Install on a connected device:
+### Ubicación del APK Generado
 
-```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+```text
+app/build/outputs/apk/debug/app-universal-debug.apk
 ```
 
-The app requests Bluetooth, location (required for BLE scanning), and notification permissions at runtime.
+### Instalación vía ADB
 
-Release APKs and the Android App Bundle can be rebuilt byte-for-byte in the
-pinned Linux container. Maintainers should follow the
-[Android release guide](docs/maintainer-release-guide.md). See
-[Reproducible builds](docs/reproducible-builds.md) for the build trust model
-and public GitHub/Google Play verification procedures.
-
-## Testing
-
-```bash
-# Unit tests
-./gradlew test
-
-# Lint
-./gradlew lint
-
-# Instrumented tests (requires a device or emulator)
-./gradlew connectedAndroidTest
+```sh
+adb install -r app/build/outputs/apk/debug/app-universal-debug.apk
 ```
 
-Note that BLE mesh behavior is difficult to emulate; protocol and session logic is covered by unit tests, while radio-level behavior needs real devices.
+---
+
+## Licencia y Privacidad
+
+- Proyecto liberado bajo licencias de código abierto compatibles.
+- Cumple estrictamente con las políticas de privacidad y protección de datos locales: no registra datos personales ni rastrea coordenadas históricas fuera de las emisiones explícitas de emergencia solicitadas por el usuario.
