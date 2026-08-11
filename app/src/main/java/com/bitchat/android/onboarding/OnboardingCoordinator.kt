@@ -193,11 +193,11 @@ class OnboardingCoordinator(
     private fun showPartialPermissionWarning(permissions: Map<String, Boolean>) {
         val deniedPermissions = permissions.filter { !it.value }.keys
         val message = buildString {
-            append("Some permissions were denied:\n")
+            append("Se denegaron algunos permisos:\n")
             deniedPermissions.forEach { permission ->
                 append("- ${getPermissionDisplayName(permission)}\n")
             }
-            append("\nbitchat may not work properly without all permissions.")
+            append("\nSOSBlu podría no funcionar correctamente sin todos los permisos.")
         }
         
         Log.w(TAG, "Partial permissions granted: $message")
@@ -215,11 +215,11 @@ class OnboardingCoordinator(
         
         if (deniedCritical.isNotEmpty()) {
             val message = buildString {
-                append("Critical permissions were denied. bitchat requires these permissions to function:\n")
+                append("Permisos críticos denegados. SOSBlu requiere estos permisos para operar:\n")
                 deniedCritical.keys.forEach { permission ->
                     append("- ${getPermissionDisplayName(permission)}\n")
                 }
-                append("\nPlease grant these permissions in Settings to use bitchat.")
+                append("\nPor favor otorga estos permisos en la Configuración de tu teléfono para usar SOSBlu.")
             }
             
             Log.e(TAG, "Critical permissions denied: $deniedCritical")

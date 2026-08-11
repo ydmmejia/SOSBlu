@@ -1,12 +1,17 @@
 package com.bitchat.android.services
 
+import androidx.test.core.app.ApplicationProvider
 import com.bitchat.android.protocol.LocationSource
 import com.bitchat.android.protocol.SOSBeaconPayload
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class BridgeRelayServiceTest {
 
     @Test
@@ -34,9 +39,8 @@ class BridgeRelayServiceTest {
             relayStatus = GatewayRelayStatus.LOCAL_MESH_ONLY
         )
 
-        val service = BridgeRelayService.getInstance(
-            org.mockito.Mockito.mock(android.content.Context::class.java, org.mockito.Mockito.RETURNS_DEEP_STUBS)
-        )
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val service = BridgeRelayService.getInstance(context)
 
         val json: JSONObject = service.buildGatewayJsonPayload(beacon)
 

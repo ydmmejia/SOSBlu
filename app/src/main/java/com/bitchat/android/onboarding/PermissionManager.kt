@@ -255,10 +255,10 @@ class PermissionManager(private val context: Context) {
         categories.add(
             PermissionCategory(
                 type = PermissionType.NEARBY_DEVICES,
-                description = "Required to discover bitchat users via Bluetooth",
+                description = "Required to discover SOSBlu users via Bluetooth",
                 permissions = bluetoothPermissions,
                 isGranted = bluetoothPermissions.all { isPermissionGranted(it) },
-                systemDescription = "Allow bitchat to connect to nearby devices"
+                systemDescription = "Allow SOSBlu to connect to nearby devices"
             )
         )
 
@@ -271,10 +271,10 @@ class PermissionManager(private val context: Context) {
         categories.add(
             PermissionCategory(
                 type = PermissionType.PRECISE_LOCATION,
-                description = "Required by Android to discover nearby bitchat users via Bluetooth",
+                description = "Required by Android to discover nearby SOSBlu users via Bluetooth",
                 permissions = locationPermissions,
                 isGranted = locationPermissions.all { isPermissionGranted(it) },
-                systemDescription = "bitchat needs this to scan for nearby devices"
+                systemDescription = "SOSBlu needs this to scan for nearby devices"
             )
         )
 
@@ -284,10 +284,10 @@ class PermissionManager(private val context: Context) {
             categories.add(
                 PermissionCategory(
                     type = PermissionType.WIFI_AWARE,
-                    description = "Enable Wi‑Fi Aware to discover and connect to nearby bitchat users over Wi‑Fi.",
+                    description = "Enable Wi‑Fi Aware to discover and connect to nearby SOSBlu users over Wi‑Fi.",
                     permissions = wifiAwarePermissions,
                     isGranted = wifiAwarePermissions.all { isPermissionGranted(it) },
-                    systemDescription = "Allow bitchat to discover nearby Wi‑Fi devices"
+                    systemDescription = "Allow SOSBlu to discover nearby Wi‑Fi devices"
                 )
             )
         }
@@ -313,7 +313,7 @@ class PermissionManager(private val context: Context) {
                     description = "Receive notifications when you receive private messages",
                     permissions = listOf(Manifest.permission.POST_NOTIFICATIONS),
                     isGranted = isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS),
-                    systemDescription = "Allow bitchat to send you notifications"
+                    systemDescription = "Allow SOSBlu to send you notifications"
                 )
             )
         }
@@ -325,10 +325,10 @@ class PermissionManager(private val context: Context) {
             categories.add(
                 PermissionCategory(
                     type = PermissionType.BATTERY_OPTIMIZATION,
-                    description = "Disable battery optimization to ensure bitchat runs reliably in the background and maintains mesh network connections",
+                    description = "Disable battery optimization to ensure SOSBlu runs reliably in the background and maintains mesh network connections",
                     permissions = listOf("BATTERY_OPTIMIZATION"), // Custom identifier
                     isGranted = isBatteryOptimizationDisabled(),
-                    systemDescription = "Allow bitchat to run without battery restrictions"
+                    systemDescription = "Allow SOSBlu to run without battery restrictions"
                 )
             )
         }

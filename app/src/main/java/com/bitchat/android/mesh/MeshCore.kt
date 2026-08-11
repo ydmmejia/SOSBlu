@@ -495,9 +495,11 @@ class MeshCore(
                     val clazz = Class.forName("com.bitchat.android.services.BridgeRelayService")
                     val method = clazz.getMethod("getInstance", android.content.Context::class.java)
                     val instance = method.invoke(null, context)
-                    val handleMethod = clazz.getMethod("onSOSBeaconPacketReceived", com.bitchat.android.protocol.BitchatPacket::class.java, java.lang.Integer.TYPE)
+                    val handleMethod = clazz.getMethod("onSOSBeaconPacketReceived", com.bitchat.android.protocol.BitchatPacket::class.java, java.lang.Integer::class.java)
                     handleMethod.invoke(instance, routed.packet, null)
-                } catch (_: Exception) { }
+                } catch (e: Exception) {
+                    android.util.Log.e("MeshCore", "Error invoking BridgeRelayService: ${e.message}")
+                }
                 return true
             }
 

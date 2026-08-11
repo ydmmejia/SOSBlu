@@ -274,10 +274,10 @@
     <string name="setup_not_complete">Configuración no completada</string>
     <string name="try_again">Intentar de nuevo</string>
     <string name="privacy_protected">Tu privacidad está protegida</string>
-    <string name="privacy_bullets">• sin rastreo o recolección de datos\n• chats mesh Bluetooth son completamente offline\n• chats geohash usan internet</string>
-    <string name="permissions_header">Permisos</string>
-    <string name="grant_permissions">Otorgar permisos</string>
-    <string name="location_tracking_warning">bitchat NO rastrea tu ubicación</string>
+    <string name="privacy_bullets">• Sin rastreo ni recolección de datos personales\n• Red de auxilio Bluetooth 100% offline\n• Firma criptográfica asimétrica Ed25519</string>
+    <string name="permissions_header">Permisos Requeridos</string>
+    <string name="grant_permissions">Otorgar Permisos</string>
+    <string name="location_tracking_warning">SOSBlu NO rastrea tu ubicación privada</string>
     <string name="nobody_around">nadie por aquí…</string>
     <string name="you_suffix"> (tú)</string>
     <string name="pan_zoom_instruction">desplaza y hace zoom para seleccionar un geohash</string>
@@ -299,14 +299,14 @@
     <string name="cd_pause_voice">Pausar</string>
 
     <!-- Descripciones de permisos -->
-    <string name="perm_nearby_devices_desc">Requerido para descubrir usuarios bitchat a través de Bluetooth</string>
-    <string name="perm_nearby_devices_system">Permitir que bitchat se conecte con dispositivos cercanos</string>
-    <string name="perm_location_desc">Requerido por Android para descubrir usuarios bitchat cercanos a través de Bluetooth</string>
-    <string name="perm_location_system">bitchat necesita esto para escanear dispositivos cercanos</string>
-    <string name="perm_notifications_desc">Recibir notificaciones cuando recibas mensajes privados</string>
-    <string name="perm_notifications_system">Permitir que bitchat te envíe notificaciones</string>
-    <string name="perm_battery_desc">Deshabilitar optimización de batería para asegurar que bitchat funcione de manera confiable en segundo plano y mantenga conexiones de red mesh</string>
-    <string name="perm_battery_system">Permitir que bitchat funcione sin restricciones de batería</string>
+    <string name="perm_nearby_devices_desc">Requerido para descubrir dispositivos cercanos a través de Bluetooth</string>
+    <string name="perm_nearby_devices_system">Permitir que SOSBlu se conecte con dispositivos cercanos</string>
+    <string name="perm_location_desc">Requerido por Android para detectar dispositivos de auxilio cercanos a través de Bluetooth</string>
+    <string name="perm_location_system">SOSBlu necesita esto para escanear dispositivos cercanos</string>
+    <string name="perm_notifications_desc">Recibir notificaciones cuando recibas alertas de auxilio</string>
+    <string name="perm_notifications_system">Permitir que SOSBlu te envíe notificaciones</string>
+    <string name="perm_battery_desc">Deshabilitar la optimización de batería para asegurar que SOSBlu funcione de manera confiable en segundo plano y mantenga la red de auxilio activa</string>
+    <string name="perm_battery_system">Permitir que SOSBlu funcione sin restricciones de batería</string>
 
     <!-- Tipos de permisos -->
     <string name="perm_type_nearby_devices">Dispositivos cercanos</string>

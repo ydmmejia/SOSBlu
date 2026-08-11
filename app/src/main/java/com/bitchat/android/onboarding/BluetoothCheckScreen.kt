@@ -72,12 +72,12 @@ private fun BluetoothDisabledContent(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Bluetooth icon - using Bluetooth outlined icon in app's green color
+        // Bluetooth icon
         Icon(
             imageVector = Icons.Outlined.Bluetooth,
             contentDescription = stringResource(R.string.cd_bluetooth),
             modifier = Modifier.size(64.dp),
-            tint = Color(0xFF00C851) // App's main green color
+            tint = Color(0xFFD32F2F)
         )
 
         Text(
@@ -101,8 +101,8 @@ private fun BluetoothDisabledContent(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                    Text(
-                        text = stringResource(R.string.bluetooth_needs_for),
+                Text(
+                    text = stringResource(R.string.bluetooth_needs_for),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Medium,
                         color = colorScheme.onSurface
@@ -110,9 +110,9 @@ private fun BluetoothDisabledContent(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                
-                    Text(
-                        text = stringResource(R.string.bluetooth_needs_bullets),
+
+                Text(
+                    text = stringResource(R.string.bluetooth_needs_bullets),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = BitchatFontFamily,
                         color = colorScheme.onSurface.copy(alpha = 0.8f)
@@ -132,11 +132,11 @@ private fun BluetoothDisabledContent(
                     onClick = onEnableBluetooth,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF00C851) // App's main green color
+                        containerColor = Color(0xFFD32F2F)
                     )
                 ) {
-                        Text(
-                            text = stringResource(R.string.enable_bluetooth),
+                    Text(
+                        text = stringResource(R.string.enable_bluetooth),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontFamily = BitchatFontFamily,
                             fontWeight = FontWeight.Bold
@@ -170,19 +170,13 @@ private fun BluetoothNotSupportedContent(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Error icon
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFFFEBEE)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.warning_emoji),
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+        // Error icon vector
+        Icon(
+            imageVector = Icons.Outlined.Warning,
+            contentDescription = null,
+            tint = colorScheme.error,
+            modifier = Modifier.size(56.dp)
+        )
 
         Text(
             text = stringResource(R.string.bluetooth_not_supported),
@@ -256,7 +250,6 @@ private fun BluetoothCheckingContent(
 
 @Composable
 private fun BluetoothLoadingIndicator() {
-    // Animated rotation for the loading indicator
     val infiniteTransition = rememberInfiniteTransition(label = "bluetooth_loading")
     val rotationAngle by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -276,7 +269,7 @@ private fun BluetoothLoadingIndicator() {
             modifier = Modifier
                 .fillMaxSize()
                 .rotate(rotationAngle),
-            color = Color(0xFF2196F3), // Bluetooth blue
+            color = Color(0xFFD32F2F),
             strokeWidth = 3.dp
         )
     }
