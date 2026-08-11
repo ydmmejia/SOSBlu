@@ -38,7 +38,7 @@ La aplicación transforma cada dispositivo Android en un transceptor de la red m
 > **Esto es 100% normal** en aplicaciones independientes de código abierto distribuidas en archivo `.apk`.
 
 ### Pasos para Instalar en 3 Segundos:
-1. Al descargar el archivo `SOSBlu-v1.0.0.apk`, abre la notificación de descarga o la carpeta **Descargas**.
+1. Al descargar el archivo `SOSBlu-v1.1.0.apk`, abre la notificación de descarga o la carpeta **Descargas**.
 2. Si Android bloquea la instalación inicial, toca en **"Configuración"** / **"Ajustes"** y activa la casilla **"Permitir desde esta fuente"**.
 3. Si Play Protect muestra una ventana de aviso, toca en **"Más detalles"** y selecciona **"Instalar de todas formas"**.
 4. Abre **SOSBlu** y concede los permisos de Bluetooth y Ubicación para dejar la aplicación lista.
