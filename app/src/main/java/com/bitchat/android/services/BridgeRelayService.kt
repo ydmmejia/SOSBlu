@@ -1,11 +1,23 @@
 package com.bitchat.android.services
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.bitchat.android.MainActivity
+import com.bitchat.android.R
+import com.bitchat.android.net.OkHttpProvider
 import com.bitchat.android.protocol.BitchatPacket
 import com.bitchat.android.protocol.MessageType
 import com.bitchat.android.protocol.SOSBeaconPayload
@@ -16,16 +28,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Intent
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
 enum class GatewayRelayStatus {
@@ -40,6 +46,7 @@ data class ReceivedSOSBeacon(
     val rssi: Int?,
     val ttlHopsRemaining: Int,
     val initialTTL: Int = 20,
+    val packetCount: Int = 1,
     var relayStatus: GatewayRelayStatus = GatewayRelayStatus.LOCAL_MESH_ONLY
 ) {
     val estimatedHopsPassed: Int get() = (initialTTL - ttlHopsRemaining).coerceAtLeast(0)
@@ -48,6 +55,8 @@ data class ReceivedSOSBeacon(
 /**
  * Service that collects incoming SOS_BEACON mesh packets and relays them via HTTPS 
  * to emergency gateway services when internet/cellular connectivity is available.
+ * Deduplicates alerts by victim device ID so multiple beacons from the same device
+ * update the existing alert rather than creating duplicate entries.
  */
 class BridgeRelayService private constructor(context: Context) {
 
@@ -90,6 +99,8 @@ class BridgeRelayService private constructor(context: Context) {
 
     /**
      * Process an incoming SOS_BEACON packet received from the BLE mesh network.
+     * Deduplicates strictly by sender device ID so repeated broadcasts from the same
+     * victim update the existing alert in real-time instead of inflating the alert counter.
      */
     fun onSOSBeaconPacketReceived(packet: BitchatPacket, rssi: Int? = null) {
         if (packet.type != MessageType.SOS_BEACON.value) return
@@ -98,38 +109,78 @@ class BridgeRelayService private constructor(context: Context) {
         val deviceIdHex = hexString(payload.deviceId)
         val deduplicationKey = "${deviceIdHex}_${payload.timestamp}"
 
-        val existingBeacon = _receivedBeacons.value.find { 
-            hexString(it.payload.deviceId) == deviceIdHex && it.payload.timestamp == payload.timestamp 
-        }
-
-        val beaconToStore = existingBeacon?.copy(
-            rssi = rssi ?: existingBeacon.rssi,
-            ttlHopsRemaining = packet.ttl.toInt()
-        ) ?: ReceivedSOSBeacon(
-            payload = payload,
-            senderDeviceIdHex = deviceIdHex,
-            receivedTimestamp = System.currentTimeMillis(),
-            rssi = rssi,
-            ttlHopsRemaining = packet.ttl.toInt(),
-            relayStatus = if (forwardedBeaconKeys.contains(deduplicationKey)) GatewayRelayStatus.RELAYED_TO_GATEWAY else GatewayRelayStatus.LOCAL_MESH_ONLY
-        )
-
-        // Update in list
         val currentList = _receivedBeacons.value.toMutableList()
-        val index = currentList.indexOfFirst { hexString(it.payload.deviceId) == deviceIdHex && it.payload.timestamp == payload.timestamp }
-        if (index >= 0) {
-            currentList[index] = beaconToStore
-        } else {
-            currentList.add(0, beaconToStore)
-            triggerEmergencyNotification(beaconToStore)
-        }
-        _receivedBeacons.value = currentList
+        val existingIndex = currentList.indexOfFirst { it.senderDeviceIdHex == deviceIdHex }
 
-        // Attempt gateway relay if network available and not already forwarded
+        // Trigger hardware emergency vibration on receiving SOS packet
+        triggerEmergencyVibration(appContext)
+
+        if (existingIndex >= 0) {
+            val existing = currentList[existingIndex]
+            // Update existing victim alert with latest payload, increment packet count, latest coordinates & battery
+            val updatedBeacon = existing.copy(
+                payload = payload,
+                receivedTimestamp = System.currentTimeMillis(),
+                rssi = rssi ?: existing.rssi,
+                ttlHopsRemaining = packet.ttl.toInt(),
+                packetCount = existing.packetCount + 1,
+                relayStatus = if (forwardedBeaconKeys.contains(deduplicationKey)) GatewayRelayStatus.RELAYED_TO_GATEWAY else existing.relayStatus
+            )
+            currentList[existingIndex] = updatedBeacon
+            _receivedBeacons.value = currentList
+            Log.d(TAG, "Updated alert for device: $deviceIdHex (Retransmissions: ${updatedBeacon.packetCount})")
+        } else {
+            // New distinct victim detected
+            val newBeacon = ReceivedSOSBeacon(
+                payload = payload,
+                senderDeviceIdHex = deviceIdHex,
+                receivedTimestamp = System.currentTimeMillis(),
+                rssi = rssi,
+                ttlHopsRemaining = packet.ttl.toInt(),
+                packetCount = 1,
+                relayStatus = if (forwardedBeaconKeys.contains(deduplicationKey)) GatewayRelayStatus.RELAYED_TO_GATEWAY else GatewayRelayStatus.LOCAL_MESH_ONLY
+            )
+            currentList.add(0, newBeacon)
+            _receivedBeacons.value = currentList
+            triggerEmergencyNotification(newBeacon)
+            Log.i(TAG, "New emergency alert registered from device: $deviceIdHex")
+        }
+
+        // Attempt gateway relay if internet connection is available
         if (_isGatewayConnected.value && !forwardedBeaconKeys.contains(deduplicationKey)) {
-            scope.launch {
-                relayToGateway(beaconToStore, deduplicationKey)
+            val beaconToRelay = currentList.firstOrNull { it.senderDeviceIdHex == deviceIdHex }
+            if (beaconToRelay != null) {
+                scope.launch {
+                    relayToGateway(beaconToRelay, deduplicationKey)
+                }
             }
+        }
+    }
+
+    /**
+     * Direct hardware haptic vibration in high-priority emergency pattern
+     */
+    private fun triggerEmergencyVibration(context: Context) {
+        try {
+            val timings = longArrayOf(0, 300, 150, 300, 150, 300, 250, 600, 150, 600, 150, 600, 250, 300, 150, 300, 150, 300)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                val vibrator = vibratorManager?.defaultVibrator
+                val amplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255)
+                val effect = VibrationEffect.createWaveform(timings, amplitudes, -1)
+                vibrator?.vibrate(effect)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                val effect = VibrationEffect.createWaveform(timings, -1)
+                vibrator?.vibrate(effect)
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(timings, -1)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Hardware vibration trigger failed: ${e.message}")
         }
     }
 
@@ -148,13 +199,11 @@ class BridgeRelayService private constructor(context: Context) {
                     description = "Alertas sonoras y de vibración cuando se recibe un faro de auxilio SOS cercano."
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
-                    enableLights(true)
-                    lightColor = android.graphics.Color.RED
                 }
                 notificationManager.createNotificationChannel(channel)
             }
 
-            val intent = Intent(appContext, com.bitchat.android.MainActivity::class.java).apply {
+            val intent = Intent(appContext, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             val pendingIntent = PendingIntent.getActivity(
@@ -164,19 +213,23 @@ class BridgeRelayService private constructor(context: Context) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val payload = beacon.payload
-            val noteText = if (!payload.freeText.isNullOrBlank()) " Nota: ${payload.freeText}" else ""
-            val body = "Víctima ID: ${beacon.senderDeviceIdHex.take(8).uppercase()} (Batería: ${payload.batteryLevel}%).$noteText"
+            val locationText = if (beacon.payload.latitude != null && beacon.payload.longitude != null) {
+                "Ubicación: %.5f, %.5f".format(beacon.payload.latitude, beacon.payload.longitude)
+            } else {
+                "Ubicación: Transmisión Malla"
+            }
+
+            val noteText = if (!beacon.payload.freeText.isNullOrBlank()) " | ${beacon.payload.freeText}" else ""
 
             val notification = NotificationCompat.Builder(appContext, channelId)
-                .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                .setContentTitle("ALERTA DE EMERGENCIA SOS RECIBIDA")
-                .setContentText(body)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("ALERTA DE AUXILIO RECIBIDA")
+                .setContentText("Dispositivo #${beacon.senderDeviceIdHex.take(8).uppercase()} ($locationText$noteText)")
+                .setStyle(NotificationCompat.BigTextStyle().bigText("Se ha recibido una señal de emergencia SOS de un dispositivo cercano.\n$locationText$noteText\nBatería: ${beacon.payload.batteryLevel}%"))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
                 .build()
 
             notificationManager.notify(beacon.senderDeviceIdHex.hashCode(), notification)
@@ -187,39 +240,30 @@ class BridgeRelayService private constructor(context: Context) {
 
     private fun setupConnectivityMonitoring() {
         try {
-            val cm = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            if (cm != null) {
-                val request = NetworkRequest.Builder()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .build()
+            val cm = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
 
-                cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
-                    override fun onAvailable(network: Network) {
-                        _isGatewayConnected.value = true
-                        Log.i(TAG, "Gateway connectivity restored. Triggering pending SOS beacon relays.")
-                        flushPendingRelays()
-                    }
+            cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    _isGatewayConnected.value = true
+                    flushPendingBeaconsToGateway()
+                }
 
-                    override fun onLost(network: Network) {
-                        _isGatewayConnected.value = false
-                        Log.i(TAG, "Gateway connectivity lost.")
-                    }
-                })
-
-                // Initial check
-                val activeNet = cm.activeNetwork
-                val caps = cm.getNetworkCapabilities(activeNet)
-                _isGatewayConnected.value = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-            }
+                override fun onLost(network: Network) {
+                    _isGatewayConnected.value = false
+                }
+            })
         } catch (e: Exception) {
             Log.e(TAG, "Failed to register network callback: ${e.message}")
         }
     }
 
-    private fun flushPendingRelays() {
+    private fun flushPendingBeaconsToGateway() {
         scope.launch {
-            val list = _receivedBeacons.value
-            for (beacon in list) {
+            val beacons = _receivedBeacons.value
+            for (beacon in beacons) {
                 val key = "${beacon.senderDeviceIdHex}_${beacon.payload.timestamp}"
                 if (!forwardedBeaconKeys.contains(key)) {
                     relayToGateway(beacon, key)
@@ -228,76 +272,44 @@ class BridgeRelayService private constructor(context: Context) {
         }
     }
 
-    fun buildGatewayJsonPayload(beacon: ReceivedSOSBeacon): JSONObject {
-        val payload = beacon.payload
-        return JSONObject().apply {
-            put("deviceId", beacon.senderDeviceIdHex)
-            put("timestamp", payload.timestamp)
-            put("locationSource", payload.locationSource.name)
-            put("latitude", payload.latitude ?: JSONObject.NULL)
-            put("longitude", payload.longitude ?: JSONObject.NULL)
-            put("gpsAccuracy", payload.gpsAccuracy ?: JSONObject.NULL)
-            put("locationTimestamp", payload.locationTimestamp ?: JSONObject.NULL)
-            put("batteryLevel", payload.batteryLevel)
-            put("freeText", payload.freeText ?: "")
-            put("estimatedHopsPassed", beacon.estimatedHopsPassed)
-            put("ttlHopsRemaining", beacon.ttlHopsRemaining)
-            put("relayedAt", System.currentTimeMillis())
-        }
-    }
-
-    private suspend fun relayToGateway(beacon: ReceivedSOSBeacon, key: String) {
-        if (forwardedBeaconKeys.contains(key)) return
-
+    private suspend fun relayToGateway(beacon: ReceivedSOSBeacon, deduplicationKey: String) {
         try {
-            val jsonPayload = buildGatewayJsonPayload(beacon)
-            Log.d(TAG, "Relaying SOS beacon to gateway ($targetGatewayEndpoint): $jsonPayload")
-
-            // Simulate / execute HTTPS POST connection
-            val url = URL(targetGatewayEndpoint)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-            conn.doOutput = true
-
-            OutputStreamWriter(conn.outputStream).use { writer ->
-                writer.write(jsonPayload.toString())
-                writer.flush()
+            val json = JSONObject().apply {
+                put("deviceId", beacon.senderDeviceIdHex)
+                put("timestamp", beacon.payload.timestamp)
+                put("locationSource", beacon.payload.locationSource.name)
+                put("latitude", beacon.payload.latitude ?: JSONObject.NULL)
+                put("longitude", beacon.payload.longitude ?: JSONObject.NULL)
+                put("gpsAccuracy", beacon.payload.gpsAccuracy ?: JSONObject.NULL)
+                put("batteryLevel", beacon.payload.batteryLevel)
+                put("freeText", beacon.payload.freeText ?: JSONObject.NULL)
+                put("hopsPassed", beacon.estimatedHopsPassed)
+                put("rssi", beacon.rssi ?: JSONObject.NULL)
             }
 
-            val responseCode = conn.responseCode
-            if (responseCode in 200..299 || responseCode == 404) {
-                // Treat 2xx or mock endpoint as successful transmission
-                forwardedBeaconKeys.add(key)
-                updateRelayStatus(key, GatewayRelayStatus.RELAYED_TO_GATEWAY)
-                Log.i(TAG, "Successfully relayed SOS beacon $key to rescue gateway.")
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val requestBody = json.toString().toRequestBody(mediaType)
+            val request = Request.Builder()
+                .url(targetGatewayEndpoint)
+                .post(requestBody)
+                .build()
+
+            val client = OkHttpProvider.httpClient()
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                forwardedBeaconKeys.add(deduplicationKey)
+                val currentList = _receivedBeacons.value.toMutableList()
+                val index = currentList.indexOfFirst { it.senderDeviceIdHex == beacon.senderDeviceIdHex }
+                if (index >= 0) {
+                    currentList[index] = currentList[index].copy(relayStatus = GatewayRelayStatus.RELAYED_TO_GATEWAY)
+                    _receivedBeacons.value = currentList
+                }
+                Log.i(TAG, "Successfully relayed beacon to gateway: $deduplicationKey")
             } else {
-                Log.w(TAG, "Gateway relay returned status code: $responseCode")
+                Log.w(TAG, "Gateway returned error ${response.code} for beacon: $deduplicationKey")
             }
         } catch (e: Exception) {
-            // Even if network connection fails on mock URL, mark as attempted / captured locally
-            Log.w(TAG, "Gateway POST request offline or mock endpoint reached: ${e.message}")
-            forwardedBeaconKeys.add(key)
-            updateRelayStatus(key, GatewayRelayStatus.RELAYED_TO_GATEWAY)
-        }
-    }
-
-    private fun updateRelayStatus(key: String, status: GatewayRelayStatus) {
-        val currentList = _receivedBeacons.value.toMutableList()
-        var modified = false
-        for (i in currentList.indices) {
-            val beacon = currentList[i]
-            val bKey = "${beacon.senderDeviceIdHex}_${beacon.payload.timestamp}"
-            if (bKey == key) {
-                currentList[i] = beacon.copy(relayStatus = status)
-                modified = true
-                break
-            }
-        }
-        if (modified) {
-            _receivedBeacons.value = currentList
+            Log.e(TAG, "Failed to relay beacon to gateway: ${e.message}")
         }
     }
 }

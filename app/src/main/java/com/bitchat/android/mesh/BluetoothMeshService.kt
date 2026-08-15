@@ -141,6 +141,32 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
         messageHandler.packetProcessor = packetProcessor
         //startPeriodicDebugLogging()
 
+        // Listen for Bluetooth state changes (e.g. enabling Bluetooth while in Airplane mode)
+        try {
+            val filter = android.content.IntentFilter(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED)
+            context.applicationContext.registerReceiver(object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: Context?, intent: android.content.Intent?) {
+                    if (intent?.action == android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED) {
+                        val state = intent.getIntExtra(android.bluetooth.BluetoothAdapter.EXTRA_STATE, android.bluetooth.BluetoothAdapter.ERROR)
+                        when (state) {
+                            android.bluetooth.BluetoothAdapter.STATE_ON -> {
+                                Log.i(TAG, "Bluetooth turned ON (e.g. from Airplane mode). Restarting BLE mesh services...")
+                                isActive = false
+                                startServices()
+                            }
+                            android.bluetooth.BluetoothAdapter.STATE_OFF,
+                            android.bluetooth.BluetoothAdapter.STATE_TURNING_OFF -> {
+                                Log.i(TAG, "Bluetooth turned OFF. Pausing BLE mesh services...")
+                                isActive = false
+                            }
+                        }
+                    }
+                }
+            }, filter)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to register Bluetooth state receiver: ${e.message}")
+        }
+
         // Flush queued private messages as soon as a BLE Noise session authenticates,
         // instead of relying on the foreground-only UI poll.
         encryptionService.onSessionEstablished = { peerID ->

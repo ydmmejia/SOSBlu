@@ -39,11 +39,11 @@ class BluetoothGattClientManager(
         private const val SCAN_STALE_RESULT_MS = 120_000L      // force a scan restart if no results for this long
     }
     
-    // Core Bluetooth components
+    // Core Bluetooth components - dynamically retrieved to survive airplane mode toggles & stack resets
     private val bluetoothManager: BluetoothManager = 
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-    private val bleScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
+    private val bluetoothAdapter: BluetoothAdapter? get() = bluetoothManager.adapter
+    private val bleScanner: BluetoothLeScanner? get() = bluetoothManager.adapter?.bluetoothLeScanner
 
     private fun isBleTransportEnabled(): Boolean {
         return try {
@@ -261,11 +261,16 @@ class BluetoothGattClientManager(
             }
         }
         
+        val scanner = bleScanner ?: run {
+            Log.e(TAG, "BLE scanner not available")
+            return
+        }
+        
         try {
             lastScanStartTime = currentTime
             isCurrentlyScanning = true
             
-            bleScanner.startScan(scanFilters, powerManager.getScanSettings(), scanCallback)
+            scanner.startScan(scanFilters, powerManager.getScanSettings(), scanCallback)
             Log.i(TAG, "BLE scan started")
         } catch (e: Exception) {
             Log.e(TAG, "Exception starting scan: ${e.message}")
@@ -278,12 +283,13 @@ class BluetoothGattClientManager(
      */
     @Suppress("DEPRECATION")
     private fun stopScanning() {
-        if (!permissionManager.hasBluetoothPermissions() || bleScanner == null) return
+        val scanner = bleScanner ?: return
+        if (!permissionManager.hasBluetoothPermissions()) return
         
         if (isCurrentlyScanning) {
             try {
                 scanCallback?.let {
-                    bleScanner.stopScan(it)
+                    scanner.stopScan(it)
                     Log.i(TAG, "BLE scan stopped")
                 }
             } catch (e: Exception) {

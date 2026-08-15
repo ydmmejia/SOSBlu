@@ -1,8 +1,7 @@
 package com.bitchat.android.onboarding
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,34 +12,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
-import com.bitchat.android.ui.theme.BitchatFontFamily
-import com.bitchat.android.R
 
-/**
- * Explanation screen shown before requesting background location permission.
- *
- * Bottom action layout matches the battery optimization skip screen so the
- * primary / check-again / skip buttons stay pixel-aligned across both screens.
- */
 @Composable
 fun BackgroundLocationPermissionScreen(
     modifier: Modifier,
@@ -48,199 +46,148 @@ fun BackgroundLocationPermissionScreen(
     onRetry: () -> Unit,
     onSkip: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
+    val bgGradient = Brush.verticalGradient(
+        listOf(
+            Color(0xFF070B14),
+            Color(0xFF0D1424),
+            Color(0xFF060912)
+        )
+    )
+    val accentRed = Color(0xFFE53935)
+    val accentRedDark = Color(0xFFB71C1C)
 
     Box(
-        modifier = modifier.padding(24.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .background(bgGradient)
+            .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Scrollable content area
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                HeaderSection(colorScheme)
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.LocationOn,
-                                contentDescription = stringResource(R.string.cd_location_services),
-                                tint = colorScheme.primary,
-                                modifier = Modifier
-                                    .padding(top = 2.dp)
-                                    .size(20.dp)
+                // Icon Badge
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .shadow(12.dp, CircleShape, spotColor = accentRed)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(accentRed, accentRedDark)
                             )
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.background_location_required_title),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = colorScheme.onBackground
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.background_location_explanation),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = colorScheme.onBackground.copy(alpha = 0.8f)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.background_location_settings_tip),
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontFamily = BitchatFontFamily
-                                    ),
-                                    color = colorScheme.onBackground.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
-                    }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
                 }
 
-                Surface(
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "UBICACIÓN EN SEGUNDO PLANO",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp,
+                        color = Color(0xFFF8FAFC),
+                        letterSpacing = (-0.5).sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Selecciona 'Permitir todo el tiempo' en los ajustes",
+                        fontSize = 12.sp,
+                        color = Color(0xFF94A3B8),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                // Info Card
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    color = colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF131B2E)),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0x3338BDF8))
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Filled.Security,
-                                contentDescription = stringResource(R.string.cd_privacy_protected),
-                                tint = colorScheme.primary,
-                                modifier = Modifier
-                                    .padding(top = 2.dp)
-                                    .size(20.dp)
+                                contentDescription = null,
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(18.dp)
                             )
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.background_location_needs_for),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = colorScheme.onBackground
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.background_location_needs_bullets),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontFamily = BitchatFontFamily,
-                                    color = colorScheme.onBackground.copy(alpha = 0.8f)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.background_location_privacy_note),
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontFamily = BitchatFontFamily,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = colorScheme.onBackground
-                                )
-                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "MONITOREO CONTINUO DE RESCATE",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 11.sp,
+                                color = Color(0xFF38BDF8),
+                                letterSpacing = 0.5.sp
+                            )
                         }
+
+                        Text(
+                            text = "Para que la aplicación pueda alertarte cuando camines cerca de una persona atrapada bajo escombros con tu celular en el bolsillo, Android requiere el permiso de ubicación constante.",
+                            fontSize = 12.sp,
+                            color = Color(0xFFCBD5E1),
+                            lineHeight = 17.sp
+                        )
                     }
                 }
             }
 
-            // Fixed buttons at the bottom — same structure/spacing as battery optimization
+            Spacer(modifier = Modifier.height(20.dp))
+
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorScheme.primary
-                    )
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = accentRed)
                 ) {
                     Text(
-                        text = stringResource(R.string.grant_background_location),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = BitchatFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
+                        text = "CONFIGURAR EN AJUSTES",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 13.5.sp,
+                        letterSpacing = 0.5.sp,
+                        modifier = Modifier.padding(vertical = 6.dp)
                     )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                TextButton(
+                    onClick = onSkip,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedButton(
-                        onClick = onRetry,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.check_again),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = BitchatFontFamily
-                            )
-                        )
-                    }
-
-                    TextButton(
-                        onClick = onSkip,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.battery_optimization_skip),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = BitchatFontFamily
-                            )
-                        )
-                    }
+                    Text(
+                        text = "Omitir por ahora",
+                        color = Color(0xFF64748B),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun HeaderSection(colorScheme: ColorScheme) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontFamily = BitchatFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
-            ),
-            color = colorScheme.onBackground
-        )
-
-        Text(
-            text = stringResource(R.string.background_location_required_subtitle),
-            fontSize = 12.sp,
-            fontFamily = BitchatFontFamily,
-            color = colorScheme.onBackground.copy(alpha = 0.7f)
-        )
     }
 }

@@ -36,11 +36,11 @@ class BluetoothGattServerManager(
         private const val ADVERTISE_MAX_RETRY_DELAY_MS = 30_000L // cap on backoff delay
     }
     
-    // Core Bluetooth components
+    // Core Bluetooth components - dynamically retrieved to survive airplane mode toggles & stack resets
     private val bluetoothManager: BluetoothManager = 
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-    private val bleAdvertiser: BluetoothLeAdvertiser? = bluetoothAdapter?.bluetoothLeAdvertiser
+    private val bluetoothAdapter: BluetoothAdapter? get() = bluetoothManager.adapter
+    private val bleAdvertiser: BluetoothLeAdvertiser? get() = bluetoothManager.adapter?.bluetoothLeAdvertiser
     
     // GATT server for peripheral mode
     private var gattServer: BluetoothGattServer? = null
@@ -431,8 +431,13 @@ class BluetoothGattServerManager(
             }
         }
         
+        val advertiser = bleAdvertiser ?: run {
+            Log.e(TAG, "BLE advertiser not available")
+            return
+        }
+        
         try {
-            bleAdvertiser.startAdvertising(settings, data, scanResponse, advertiseCallback)
+            advertiser.startAdvertising(settings, data, scanResponse, advertiseCallback)
         } catch (se: SecurityException) {
             Log.e(TAG, "SecurityException starting advertising (missing permission?): ${se.message}")
         } catch (e: Exception) {
@@ -445,9 +450,10 @@ class BluetoothGattServerManager(
      */
     @Suppress("DEPRECATION")
     private fun stopAdvertising() {
-        if (!permissionManager.hasBluetoothPermissions() || bleAdvertiser == null) return
+        val advertiser = bleAdvertiser ?: return
+        if (!permissionManager.hasBluetoothPermissions()) return
         try {
-            advertiseCallback?.let { cb -> bleAdvertiser.stopAdvertising(cb) }
+            advertiseCallback?.let { cb -> advertiser.stopAdvertising(cb) }
         } catch (e: Exception) {
             Log.w(TAG, "Error stopping advertising: ${e.message}")
         }

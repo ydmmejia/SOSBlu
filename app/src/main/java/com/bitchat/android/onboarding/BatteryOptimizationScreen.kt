@@ -1,30 +1,47 @@
 package com.bitchat.android.onboarding
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bitchat.android.ui.theme.BitchatFontFamily
-import com.bitchat.android.R
-
-/**
- * Screen shown when checking battery optimization status or requesting battery optimization disable
- */
 
 @Composable
 fun BatteryOptimizationScreen(
@@ -36,39 +53,38 @@ fun BatteryOptimizationScreen(
     isLoading: Boolean = false
 ) {
     val context = LocalContext.current
-    val colorScheme = MaterialTheme.colorScheme
-    
-    // Initialize preference manager
     LaunchedEffect(Unit) {
         BatteryOptimizationPreferenceManager.init(context)
     }
 
+    val bgGradient = Brush.verticalGradient(
+        listOf(
+            Color(0xFF070B14),
+            Color(0xFF0D1424),
+            Color(0xFF060912)
+        )
+    )
+
     Box(
-        modifier = modifier.padding(24.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .background(bgGradient)
+            .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
         when (status) {
             BatteryOptimizationStatus.ENABLED -> {
                 BatteryOptimizationEnabledContent(
                     onDisableBatteryOptimization = onDisableBatteryOptimization,
-                    onRetry = onRetry,
                     onSkip = onSkip,
-                    colorScheme = colorScheme,
                     isLoading = isLoading
                 )
             }
-            
             BatteryOptimizationStatus.DISABLED -> {
-                BatteryOptimizationCheckingContent(
-                    colorScheme = colorScheme
-                )
+                BatteryOptimizationCheckingContent()
             }
-            
             BatteryOptimizationStatus.NOT_SUPPORTED -> {
-                BatteryOptimizationNotSupportedContent(
-                    onRetry = onRetry,
-                    colorScheme = colorScheme
-                )
+                BatteryOptimizationCheckingContent()
             }
         }
     }
@@ -77,191 +93,141 @@ fun BatteryOptimizationScreen(
 @Composable
 private fun BatteryOptimizationEnabledContent(
     onDisableBatteryOptimization: () -> Unit,
-    onRetry: () -> Unit,
     onSkip: () -> Unit,
-    colorScheme: ColorScheme,
     isLoading: Boolean
 ) {
-    val context = LocalContext.current
-    
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Scrollable content area
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Header Section - matching AboutSheet style
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontFamily = BitchatFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 32.sp
-                    ),
-                    color = colorScheme.onBackground
-                )
+    val accentRed = Color(0xFFE53935)
+    val accentRedDark = Color(0xFFB71C1C)
 
-                    Text(
-                        text = stringResource(R.string.battery_optimization_detected_title),
-                    fontSize = 12.sp,
-                    fontFamily = BitchatFontFamily,
-                    color = colorScheme.onBackground.copy(alpha = 0.7f)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Icon Badge
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .shadow(12.dp, CircleShape, spotColor = accentRed)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            listOf(accentRed, accentRedDark)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.BatteryAlert,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
                 )
             }
-            
-            // Battery optimization info section
-            Surface(
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "DESACTIVAR AHORRO DE BATERÍA",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 20.sp,
+                    color = Color(0xFFF8FAFC),
+                    letterSpacing = (-0.5).sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Garantiza que la app no se apague con la pantalla bloqueada",
+                    fontSize = 12.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Info Card
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                color = colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                shape = RoundedCornerShape(12.dp)
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF131B2E)),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, Color(0x3338BDF8))
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Filled.Power,
-                            contentDescription = stringResource(R.string.cd_battery_optimization),
-                            tint = colorScheme.primary,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(20.dp)
+                            contentDescription = null,
+                            tint = Color(0xFF38BDF8),
+                            modifier = Modifier.size(18.dp)
                         )
-                        Column {
-                                Text(
-                                    text = stringResource(R.string.battery_optimization_enabled_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.battery_optimization_explanation_short),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onBackground.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
-                }
-            }
-            
-            // Benefits section
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = stringResource(R.string.cd_benefits),
-                            tint = colorScheme.primary,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(20.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "EMISIÓN CONTINUA EN RESCATES",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            color = Color(0xFF38BDF8),
+                            letterSpacing = 0.5.sp
                         )
-                        Column {
-                                Text(
-                                    text = stringResource(R.string.benefits_of_disabling),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.battery_benefits_short),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onBackground.copy(alpha = 0.8f)
-                            )
-                        }
                     }
+
+                    Text(
+                        text = "Android suele congelar aplicaciones en segundo plano para ahorrar batería. Al permitir ejecución sin restricciones, SOSBlu mantendrá el faro de auxilio encendido bajo escombros aunque el celular esté bloqueado.",
+                        fontSize = 12.sp,
+                        color = Color(0xFFCBD5E1),
+                        lineHeight = 17.sp
+                    )
                 }
             }
         }
-        
-        // Fixed buttons at the bottom
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = onDisableBatteryOptimization,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary
-                )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = accentRed,
+                modifier = Modifier.size(32.dp)
+            )
+        } else {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
+                Button(
+                    onClick = onDisableBatteryOptimization,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = accentRed)
+                ) {
                     Text(
-                        text = stringResource(R.string.disable_battery_optimization),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = BitchatFontFamily,
+                        text = "PERMITIR EJECUCIÓN CONTINUA",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 13.5.sp,
+                        letterSpacing = 0.5.sp,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
+                }
+
+                TextButton(
+                    onClick = onSkip,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Omitir y continuar",
+                        color = Color(0xFF64748B),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
-                )
-            }
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onRetry,
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading
-                ) {
-                        Text(
-                            text = stringResource(R.string.check_again),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = BitchatFontFamily
-                        )
-                    )
-                }
-                
-                TextButton(
-                    onClick = {
-                        BatteryOptimizationPreferenceManager.setSkipped(context, true)
-                        onSkip()
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading
-                ) {
-                        Text(
-                            text = stringResource(R.string.battery_optimization_skip),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = BitchatFontFamily
-                        )
-                    )
                 }
             }
         }
@@ -269,129 +235,22 @@ private fun BatteryOptimizationEnabledContent(
 }
 
 @Composable
-private fun BatteryOptimizationCheckingContent(
-    colorScheme: ColorScheme
-) {
+private fun BatteryOptimizationCheckingContent() {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header Section - matching AboutSheet style
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontFamily = BitchatFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = colorScheme.onBackground
-            )
+        CircularProgressIndicator(
+            color = Color(0xFFE53935),
+            modifier = Modifier.size(40.dp)
+        )
 
-                Text(
-                    text = stringResource(R.string.battery_optimization_disabled_title),
-                fontSize = 12.sp,
-                fontFamily = BitchatFontFamily,
-                color = colorScheme.onBackground.copy(alpha = 0.7f)
-            )
-        }
-        
-        val infiniteTransition = rememberInfiniteTransition(label = "rotation")
-        val rotation by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 360f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "rotation"
-        )
-        
-        Icon(
-            imageVector = Icons.Filled.BatteryStd,
-            contentDescription = stringResource(R.string.cd_checking_battery_optimization),
-            modifier = Modifier
-                .size(64.dp)
-                .rotate(rotation),
-            tint = colorScheme.primary
-        )
-        
-            Text(
-                text = stringResource(R.string.battery_optimization_success_message),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = BitchatFontFamily,
-                color = colorScheme.onBackground.copy(alpha = 0.8f)
-            ),
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun BatteryOptimizationNotSupportedContent(
-    onRetry: () -> Unit,
-    colorScheme: ColorScheme
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Header Section - matching AboutSheet style
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontFamily = BitchatFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = colorScheme.onBackground
-            )
-
-            Text(
-                text = stringResource(R.string.battery_optimization_not_required),
-                fontSize = 12.sp,
-                fontFamily = BitchatFontFamily,
-                color = colorScheme.onBackground.copy(alpha = 0.7f)
-            )
-        }
-        
-        Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = stringResource(R.string.cd_not_supported_battery_optimization),
-            modifier = Modifier.size(64.dp),
-            tint = colorScheme.primary
-        )
-        
         Text(
-            text = stringResource(R.string.battery_optimization_not_supported_message),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = BitchatFontFamily,
-                color = colorScheme.onBackground.copy(alpha = 0.8f)
-            ),
-            textAlign = TextAlign.Center
+            text = "INICIALIZANDO MOTOR DE ENLACE...",
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+            letterSpacing = 0.5.sp
         )
-        
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorScheme.primary
-            )
-        ) {
-                Text(
-                    text = stringResource(R.string.continue_btn),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = BitchatFontFamily,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
     }
 }
