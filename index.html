@@ -3,683 +3,1181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOSBlu — Red Táctica de Rescate y Auxilio BLE</title>
-  <meta name="description" content="Plataforma de rescate para personas atrapadas bajo escombros en terremotos y colapsos estructurales. Enlace salto-a-salto Bluetooth Low Energy 100% offline.">
-  <meta name="theme-color" content="#08090c">
+  <title>SOSBlu — Manual de Campo y Protocolo de Rescate BLE Fuera de Línea</title>
+  <meta name="description" content="Manual técnico de campo y protocolo de radio BLE para el rescate y localización de personas atrapadas bajo escombros en terremotos. Operación 100% fuera de línea.">
+  <meta name="theme-color" content="#0c0d10">
 
   <!-- Open Graph -->
-  <meta property="og:title" content="SOSBlu — Red Táctica de Rescate BLE Fuera de Línea">
-  <meta property="og:description" content="Detección y rescate de personas atrapadas en desastres mediante propagación salto-a-salto Bluetooth sin internet ni señal celular.">
+  <meta property="og:title" content="SOSBlu — Protocolo Táctico de Rescate BLE Fuera de Línea">
+  <meta property="og:description" content="Red de auxilio salto-a-salto Bluetooth Low Energy para catástrofes y colapsos estructurales sin internet ni señal celular.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://github.com/ydmmejia/SOSBlu">
 
-  <!-- Google Fonts: Inter & Geist Mono -->
+  <!-- Google Fonts: Geist, Geist Mono, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&family=Geist:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800;900&family=Geist:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #08090c;
-      --surface-card: #0d1017;
-      --surface-block: #10131b;
-      --border: #1f2433;
-      --border-accent: #2a3347;
-      --text-white: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --red-emergency: #e11d48;
-      --red-hover: #be123c;
-      --green-status: #22c55e;
-      --cyan-radar: #38bdf8;
-      --font-display: 'Geist', sans-serif;
-      --font-body: 'Inter', sans-serif;
+      --bg: #0c0d10;
+      --bg-surface: #101217;
+      --bg-subtle: #14161f;
+      --bg-alt: #08090c;
+      --border-grid: #262933;
+      --border-light: #363a47;
+      --text-white: #ffffff;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --red-emergency: #ff3b30;
+      --red-hover: #e02d22;
+      --red-subtle: rgba(255, 59, 48, 0.12);
+      --red-border: rgba(255, 59, 48, 0.35);
+      --green-live: #22c55e;
+      --green-subtle: rgba(34, 197, 94, 0.12);
+      --cyan-radio: #38bdf8;
+      --cyan-subtle: rgba(56, 189, 248, 0.12);
+      --font-display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'Geist Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; font-size: 16px; }
     body {
       background-color: var(--bg);
-      color: var(--text-white);
+      color: var(--text-main);
       font-family: var(--font-body);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .container {
-      max-width: 1240px;
+    /* Swiss Structure Container */
+    .master-wrapper {
+      max-width: 1440px;
       margin: 0 auto;
-      padding: 0 32px;
+      border-left: 1px solid var(--border-grid);
+      border-right: 1px solid var(--border-grid);
+      background-color: var(--bg);
     }
 
-    /* Mission Control Header */
+    /* Top Technical Ribbon */
+    .technical-ribbon {
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-grid);
+      padding: 6px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+    }
+
+    .ribbon-status {
+      color: var(--red-emergency);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ribbon-status::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--red-emergency);
+      border-radius: 50%;
+      animation: pulse-dot 1.5s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Swiss Navbar */
     header {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(8, 9, 12, 0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      background: rgba(12, 13, 16, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-grid);
     }
 
-    .header-bar {
+    .header-inner {
+      padding: 16px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 0;
     }
 
-    .brand-cluster {
+    .brand-block {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       text-decoration: none;
       color: var(--text-white);
     }
 
-    .brand-badge {
-      width: 28px;
-      height: 28px;
+    .brand-symbol {
+      width: 38px;
+      height: 38px;
       background: var(--red-emergency);
-      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: var(--font-mono);
       font-weight: 900;
-      font-size: 0.8rem;
+      font-size: 1rem;
+      color: #fff;
     }
 
-    .brand-title {
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
       font-family: var(--font-mono);
-      font-size: 0.85rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+
+    nav.nav-links {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+
+    nav.nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: color 0.15s;
+    }
+
+    nav.nav-links a:hover { color: var(--text-white); }
+
+    .btn-nav-download {
+      background: var(--red-emergency);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-decoration: none;
+      padding: 10px 18px;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-nav-download:hover { background: var(--red-hover); }
+
+    /* SEC 001: Hero Spec Section */
+    .section-hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      border-bottom: 1px solid var(--border-grid);
+    }
+
+    .hero-left {
+      padding: 56px 48px;
+      border-right: 1px solid var(--border-grid);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .section-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 1px;
     }
 
-    .tag-status {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      color: var(--green-status);
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    .header-tools {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .tool-metric {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-dim);
-    }
-
-    .btn-download-nav {
-      background: var(--red-emergency);
-      color: #fff;
-      text-decoration: none;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 800;
-      padding: 8px 16px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-      transition: background 0.15s ease;
-    }
-
-    .btn-download-nav:hover { background: var(--red-hover); }
-
-    /* Hero Tactical Zone */
-    .hero {
-      padding: 80px 0 60px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 48px;
-      align-items: center;
-    }
-
-    .hero-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    .hero-eyebrow span { color: var(--red-emergency); }
+    .tag-index { color: var(--red-emergency); }
+    .tag-title { color: var(--text-dim); }
 
     .hero-headline {
       font-family: var(--font-display);
-      font-size: 3.2rem;
+      font-size: 3.1rem;
       font-weight: 900;
-      line-height: 1.08;
+      line-height: 1.05;
       letter-spacing: -1.5px;
-      margin-bottom: 20px;
+      color: var(--text-white);
+      text-transform: uppercase;
     }
 
-    .hero-desc {
+    .hero-summary {
       font-size: 1.05rem;
       color: var(--text-muted);
-      line-height: 1.65;
-      margin-bottom: 32px;
+      line-height: 1.6;
+      max-width: 680px;
     }
 
-    .hero-actions {
+    .hero-actions-row {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
+      margin-top: 4px;
     }
 
-    .btn-action-primary {
+    .btn-brutal-primary {
       background: var(--red-emergency);
       color: #fff;
-      text-decoration: none;
       font-family: var(--font-mono);
-      font-size: 0.88rem;
-      font-weight: 800;
-      padding: 14px 28px;
-      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-decoration: none;
+      padding: 16px 28px;
       letter-spacing: 0.5px;
       transition: background 0.15s;
+      border: none;
+      cursor: pointer;
     }
 
-    .btn-action-primary:hover { background: var(--red-hover); }
+    .btn-brutal-primary:hover { background: var(--red-hover); }
 
-    .btn-action-secondary {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      color: var(--text-white);
-      text-decoration: none;
+    .btn-brutal-secondary {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-grid);
       font-family: var(--font-mono);
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      padding: 14px 24px;
-      border-radius: 6px;
-      transition: border-color 0.15s;
+      text-decoration: none;
+      padding: 16px 24px;
+      letter-spacing: 0.5px;
+      transition: border-color 0.15s, color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .btn-action-secondary:hover { border-color: var(--border-accent); }
-
-    /* Tactical HUD Card */
-    .hud-card-wrapper {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
+    .btn-brutal-secondary:hover {
+      border-color: var(--border-light);
+      color: #fff;
     }
 
-    .hud-header {
+    /* Swiss Specification Table */
+    .spec-table-box {
+      border: 1px solid var(--border-grid);
+      background: var(--bg-surface);
+      margin-top: 8px;
+    }
+
+    .spec-table-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-grid);
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
+    }
+
+    .spec-table-row:last-child { border-bottom: none; }
+    .spec-key { color: var(--text-dim); font-weight: 800; }
+    .spec-val { color: var(--text-white); font-weight: 700; text-align: right; }
+
+    /* Hero Right: Live Telemetry Terminal */
+    .hero-right {
+      background: #090a0d;
+      padding: 48px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .fig-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .fig-title { color: var(--red-emergency); }
+    .fig-live-badge { color: var(--green-live); display: flex; align-items: center; gap: 6px; }
+
+    .terminal-console {
+      background: var(--bg-alt);
+      border: 1px solid var(--border-grid);
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .terminal-opcode-bar {
+      background: var(--bg-subtle);
+      border-left: 3px solid var(--red-emergency);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-weight: 800;
     }
 
-    .hud-radar-screen {
-      background: #06070a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .radar-circle {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: var(--red-emergency);
-      border: 2px solid #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 30px rgba(225, 29, 72, 0.6);
-    }
-
-    .radar-circle .main { font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; }
-    .radar-circle .sub { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.5px; }
-
-    .hud-payload-box {
-      background: #06070a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
+    .terminal-lines {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      line-height: 1.5;
     }
 
-    /* Mesh Topology Map */
-    .section-mesh {
-      padding: 70px 0;
-    }
+    .t-label { color: var(--text-dim); }
+    .t-coord { color: var(--cyan-radio); font-weight: 700; }
+    .t-batt { color: var(--green-live); font-weight: 800; }
+    .t-alert { color: var(--red-emergency); font-weight: 700; }
+    .t-hash { color: #818cf8; }
 
-    .topology-container {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 36px 40px;
-    }
-
-    .topology-head {
+    .signal-meter-box {
+      border: 1px solid var(--border-grid);
+      background: var(--bg-surface);
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
     }
 
-    .topology-title {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
+    .meter-bar-visual {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .meter-pip {
+      width: 4px;
+      height: 12px;
+      background: var(--border-grid);
+    }
+
+    .meter-pip.active { background: var(--cyan-radio); }
+    .meter-pip.active.hot { background: var(--green-live); }
+
+    .terminal-trigger-btn {
+      background: #14161f;
+      border: 1px solid var(--border-grid);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
     }
 
-    .nodes-grid {
+    .terminal-trigger-btn:hover {
+      background: var(--red-emergency);
+      color: #fff;
+      border-color: var(--red-emergency);
+    }
+
+    /* SEC 002: Propagation Flow Diagram */
+    .section-propagation {
+      border-bottom: 1px solid var(--border-grid);
+    }
+
+    .section-head-bar {
+      padding: 32px 48px;
+      border-bottom: 1px solid var(--border-grid);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .section-main-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--text-white);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .propagation-columns {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
     }
 
-    .node-block {
-      background: var(--surface-block);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
+    .prop-column {
+      padding: 32px 28px;
+      border-right: 1px solid var(--border-grid);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .prop-column:last-child { border-right: none; }
+    .prop-column:hover, .prop-column.active { background: var(--bg-surface); }
+
+    .prop-tag {
+      display: inline-block;
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+    }
+
+    .prop-tag.origin { background: var(--red-emergency); color: #fff; }
+    .prop-tag.relay { background: var(--cyan-subtle); color: var(--cyan-radio); border: 1px solid rgba(56, 189, 248, 0.4); }
+    .prop-tag.dest { background: var(--green-subtle); color: var(--green-live); border: 1px solid rgba(34, 197, 94, 0.4); }
+
+    .prop-node-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .prop-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .prop-telemetry-box {
+      margin-top: auto;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-grid);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* SEC 003: Comparison Matrix Table */
+    .section-matrix {
+      border-bottom: 1px solid var(--border-grid);
+      padding: 48px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border-grid);
+      margin-top: 24px;
+      background: var(--bg-surface);
+      font-size: 0.88rem;
+    }
+
+    .matrix-table th {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-grid);
+      padding: 14px 18px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .matrix-table th.col-trad { color: #f87171; width: 40%; }
+    .matrix-table th.col-sos { color: var(--green-live); width: 40%; }
+    .matrix-table th.col-param { color: var(--text-dim); width: 20%; }
+
+    .matrix-table td {
+      border: 1px solid var(--border-grid);
+      padding: 14px 18px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .td-param { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--text-white); }
+    .td-trad { color: #fca5a5; font-size: 0.84rem; }
+    .td-sos { color: #86efac; font-size: 0.84rem; font-weight: 500; }
+
+    /* Interactive Battery Calculator */
+    .calculator-panel {
+      margin-top: 32px;
+      border: 1px solid var(--border-grid);
+      background: var(--bg-alt);
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .calc-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .calc-slider-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .node-block.origin { border-color: var(--red-emergency); border-width: 2px; }
-    .node-block.destination { border-color: var(--green-status); border-width: 2px; }
-
-    .node-tag {
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
       font-family: var(--font-mono);
-      font-size: 0.65rem;
+      font-size: 0.72rem;
       font-weight: 800;
     }
 
-    .node-title {
-      font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 700;
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      background: var(--border-grid);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
-    .node-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.45;
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--red-emergency);
+      cursor: pointer;
     }
 
-    .node-telemetry {
+    .calc-display {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-grid);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-left: 4px solid var(--green-live);
+    }
+
+    .calc-display-label {
       font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
+      font-size: 0.7rem;
+      font-weight: 800;
       color: var(--text-dim);
-      margin-top: auto;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
     }
 
-    /* Comparison Matrix */
-    .section-compare {
-      padding: 60px 0 80px;
+    .calc-display-val {
+      font-family: var(--font-mono);
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--green-live);
+      line-height: 1.1;
     }
 
-    .matrix-grid {
+    .calc-display-sub {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* SEC 004: Downloads & Sideload Guide */
+    .section-download {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 24px;
+      border-bottom: 1px solid var(--border-grid);
     }
 
-    .matrix-card {
-      border-radius: 12px;
-      padding: 28px;
+    .dl-left {
+      padding: 48px;
+      border-right: 1px solid var(--border-grid);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 20px;
     }
 
-    .matrix-card.trad {
-      background: #130e10;
-      border: 1px solid #38171c;
-      color: #fda4af;
-    }
-
-    .matrix-card.sos {
-      background: #0b1510;
-      border: 1px solid #143820;
-      color: #86efac;
-    }
-
-    .matrix-header {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .matrix-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 0.88rem;
-    }
-
-    /* Download & Disclaimer */
-    .section-download {
-      padding: 60px 0;
-    }
-
-    .download-banner {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 36px 40px;
+    .apk-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-grid);
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      gap: 16px;
     }
 
-    .disclaimer-card {
-      background: #101217;
-      border: 1px solid #222632;
-      border-radius: 10px;
-      padding: 20px 24px;
-      font-size: 0.82rem;
+    .apk-title {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .apk-sub {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .dl-right {
+      padding: 48px;
+      background: #090a0d;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .guide-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--text-white);
+      text-transform: uppercase;
+    }
+
+    .guide-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 0.85rem;
       color: var(--text-muted);
       line-height: 1.55;
     }
 
+    .guide-steps li strong {
+      color: var(--text-white);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .disclaimer-box {
+      background: #191415;
+      border: 1px solid rgba(255, 59, 48, 0.4);
+      padding: 16px 20px;
+      font-size: 0.78rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
     .disclaimer-tag {
       font-family: var(--font-mono);
+      font-weight: 900;
       font-size: 0.72rem;
-      font-weight: 800;
       color: var(--red-emergency);
-      letter-spacing: 0.8px;
-      margin-bottom: 6px;
       display: block;
+      margin-bottom: 4px;
     }
 
+    /* Colophon Footer */
     footer {
-      padding: 40px 0 60px;
-      border-top: 1px solid var(--border);
-      font-size: 0.8rem;
-      color: var(--text-dim);
-    }
-
-    .footer-content {
+      padding: 24px 48px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
     }
 
     .footer-links a {
-      color: var(--text-dim);
+      color: var(--text-muted);
       text-decoration: none;
-      margin-left: 20px;
       transition: color 0.15s;
     }
 
     .footer-links a:hover { color: var(--text-white); }
 
-    @media (max-width: 960px) {
-      .hero-grid { grid-template-columns: 1fr; }
-      .nodes-grid { grid-template-columns: 1fr 1fr; }
-      .matrix-grid { grid-template-columns: 1fr; }
-      .download-banner { flex-direction: column; gap: 20px; text-align: center; }
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .section-hero { grid-template-columns: 1fr; }
+      .hero-left { border-right: none; border-bottom: 1px solid var(--border-grid); }
+      .propagation-columns { grid-template-columns: 1fr 1fr; }
+      .prop-column:nth-child(2) { border-right: none; }
+      .prop-column:nth-child(1), .prop-column:nth-child(2) { border-bottom: 1px solid var(--border-grid); }
+      .section-download { grid-template-columns: 1fr; }
+      .dl-left { border-right: none; border-bottom: 1px solid var(--border-grid); }
+      .calculator-panel { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 720px) {
+      .technical-ribbon { display: none; }
+      .header-inner { padding: 14px 20px; }
+      nav.nav-links { display: none; }
+      .hero-left, .hero-right, .section-head-bar, .section-matrix, .dl-left, .dl-right, footer { padding: 28px 20px; }
       .hero-headline { font-size: 2.2rem; }
-      .nodes-grid { grid-template-columns: 1fr; }
-      .header-tools .tool-metric { display: none; }
+      .propagation-columns { grid-template-columns: 1fr; }
+      .prop-column { border-right: none !important; border-bottom: 1px solid var(--border-grid); }
+      .prop-column:last-child { border-bottom: none; }
+      .matrix-table th, .matrix-table td { padding: 10px; font-size: 0.75rem; }
+      footer { flex-direction: column; gap: 14px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="container header-bar">
-      <a href="#" class="brand-cluster">
-        <div class="brand-badge">▲</div>
-        <div class="brand-title">SOSBLU // PROTOCOLO DE RESCATE</div>
-        <span class="tag-status">RED OFFLINE VIVA</span>
-      </a>
+  <div class="master-wrapper">
 
-      <div class="header-tools">
-        <span class="tool-metric">FREC: 2.4 GHz BLE</span>
-        <span class="tool-metric">CANALES: 37/38/39</span>
-        <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-download-nav">
-          DESCARGAR APK v1.1.0
+    <!-- Top Ribbon -->
+    <div class="technical-ribbon">
+      <div>DOC: MAN-SOSBLU-2026-V1.1 • CLASIFICACIÓN: PROTOCOLO DE AUXILIO ABIERTO • OPCODE: 0x30</div>
+      <div class="ribbon-status">ENLACE OFFLINE VIGILANTE [2.402 - 2.480 GHz]</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+      <div class="header-inner">
+        <a href="#" class="brand-block">
+          <div class="brand-symbol">SB</div>
+          <div class="brand-meta">
+            <span class="brand-name">SOSBLU</span>
+            <span class="brand-sub">RED MALLA BLE DE RESCATE EN DESASTRES</span>
+          </div>
+        </a>
+
+        <nav class="nav-links">
+          <a href="#sec-001">01. PROTOCOLO</a>
+          <a href="#sec-002">02. PROPAGACIÓN</a>
+          <a href="#sec-003">03. MATRIZ</a>
+          <a href="#sec-004">04. DESCARGAS</a>
+        </nav>
+
+        <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-nav-download">
+          DESCARGAR APK v1.1.0 →
         </a>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container hero-grid">
-      <div>
-        <div class="hero-eyebrow">
-          <span>[+]</span> SISTEMA TÁCTICO DE LOCALIZACIÓN SALTO-A-SALTO
+    <!-- SEC 001: Hero Specification -->
+    <section id="sec-001" class="section-hero">
+      <div class="hero-left">
+        <div class="section-tag">
+          <span class="tag-index">[ SEC // 001 ]</span>
+          <span class="tag-title">DIRECTIVA DE RESCATE EN COLAPSO DE INFRAESTRUCTURA</span>
         </div>
 
         <h1 class="hero-headline">
-          RESCATE DE PERSONAS ATRAPADAS BAJO ESCOMBROS.
+          Rescate de personas atrapadas en terremotos.
         </h1>
 
-        <p class="hero-desc">
-          Cuando un sismo destruye las torres celulares y corta la energía eléctrica, SOSBlu activa una red de radio Bluetooth autónoma. El teléfono de la víctima emite un faro de socorro continuo que atraviesa el concreto de teléfono a teléfono hasta guiar a las brigadas de rescate.
+        <p class="hero-summary">
+          Cuando un sismo destruye las antenas celulares y corta el suministro eléctrico, SOSBlu transforma cada celular en un nodo de transmisión Bluetooth de bajo consumo. El faro de auxilio de la víctima se propaga automáticamente de teléfono a teléfono (hasta 20 saltos) atravesando losas de hormigón hasta alcanzar la superficie.
         </p>
 
-        <div class="hero-actions">
-          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-action-primary">
+        <div class="hero-actions-row">
+          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-brutal-primary">
             DESCARGAR SOSBLU v1.1.0 (.APK)
           </a>
-          <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener" class="btn-action-secondary">
-            CÓDIGO FUENTE (GITHUB)
+          <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener" class="btn-brutal-secondary">
+            REPOSITORIO GITHUB ↗
           </a>
         </div>
-      </div>
 
-      <!-- Tactical HUD Mockup -->
-      <div class="hud-card-wrapper">
-        <div class="hud-header">
-          <span style="color: var(--red-emergency);">FARO ACTIVO // ID #A48F9E21</span>
-          <span style="color: var(--cyan-radar);">MODO AVION: ACTIVO</span>
-        </div>
-
-        <div class="hud-radar-screen">
-          <div class="radar-circle">
-            <div class="main">SOS</div>
-            <div class="sub">EN VIVO</div>
+        <!-- Specification Data Sheet -->
+        <div class="spec-table-box">
+          <div class="spec-table-row">
+            <span class="spec-key">TOPOLOGÍA DE RED</span>
+            <span class="spec-val">Malla BLE sin conexión central • TTL 20 Saltos</span>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); margin-top: 10px; font-weight: 700;">
-            RANGO RADIAL DE TRANSMISIÓN: ~40 METROS
+          <div class="spec-table-row">
+            <span class="spec-key">COMPATIBILIDAD ENERGÉTICA</span>
+            <span class="spec-val">100% Modo Avión • 48h a 72h con PowerManager</span>
           </div>
-        </div>
-
-        <div class="hud-payload-box">
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: #fff;">GPS: 4.609710, -74.081750 (±3m)</span>
-            <span style="color: var(--green-status);">BATERÍA: 82%</span>
+          <div class="spec-table-row">
+            <span class="spec-key">SEGURIDAD CRIPTOGRÁFICA</span>
+            <span class="spec-val">Firma asimétrica Ed25519 (256-bit) anti-spoofing</span>
           </div>
-          <div style="color: var(--red-emergency); font-weight: 700;">
-            DETALLE: SÓTANO 1 // ATRAPADO BAJO LOSA ESTE
-          </div>
-          <div style="color: var(--text-dim); font-size: 0.65rem;">
-            FIRMA: Ed25519 [9e8f...21a0] VERIFICADA &bull; TTL: 20 SALTOS
+          <div class="spec-table-row">
+            <span class="spec-key">SERVICIO FOREGROUND</span>
+            <span class="spec-val">EmergencyBeaconService activo con pantalla bloqueada</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Mesh Network Topology Architecture Map -->
-  <section class="section-mesh">
-    <div class="container">
-      <div class="topology-container">
-        <div class="topology-head">
-          <div>
-            <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: var(--red-emergency); letter-spacing: 1px;">
-              TOPOLOGÍA DE PROPAGACIÓN SALTO-A-SALTO (TTL: 20)
+      <!-- Hero Right: Live Telemetry Terminal -->
+      <div class="hero-right">
+        <div class="fig-header">
+          <span class="fig-title">FIG 01 // TELEMETRÍA DE FARO ACTIVO</span>
+          <span class="fig-live-badge">● EN TRANSMISIÓN</span>
+        </div>
+
+        <div class="terminal-console">
+          <div class="terminal-opcode-bar">
+            <span style="color: var(--red-emergency);">OPCODE: 0x30 [MESSAGE_TYPE.SOS_BEACON]</span>
+            <span style="color: var(--text-dim);">LEN: 108 BYTES</span>
+          </div>
+
+          <div class="terminal-lines">
+            <div><span class="t-label">DEVICE_ID     :</span> <span id="telemetry-device">[9E 8F 21 A0 BC 44 11 02]</span></div>
+            <div><span class="t-label">TIMESTAMP     :</span> <span id="telemetry-time">1771092873491</span> ms (Unix Epoch)</div>
+            <div><span class="t-label">COORD_LAT_LON :</span> <span class="t-coord">4.609710, -74.081750</span> (±2.8m WGS84)</div>
+            <div><span class="t-label">BATTERY_LEVEL :</span> <span class="t-batt" id="telemetry-batt">82%</span> [<span id="telemetry-hours">61h 20m</span> de emisión continua]</div>
+            <div><span class="t-label">LOCATION_NOTE :</span> <span class="t-alert">“Sótano -2, bajo losa este”</span></div>
+            <div><span class="t-label">ED25519_SIG   :</span> <span class="t-hash">[7a 3f 8c 2e 9b 1d 40 a8 ... f1 02]</span> ✓ VERIFICADA</div>
+          </div>
+
+          <div class="signal-meter-box">
+            <span style="color: var(--text-dim); font-weight: 800;">NIVEL DE SEÑAL BLE (RSSI)</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span id="telemetry-rssi" style="color: var(--cyan-radio); font-weight: 800;">-68 dBm</span>
+              <div class="meter-bar-visual">
+                <div class="meter-pip active"></div>
+                <div class="meter-pip active"></div>
+                <div class="meter-pip active"></div>
+                <div class="meter-pip active hot"></div>
+                <div class="meter-pip"></div>
+              </div>
             </div>
-            <h2 class="topology-title">
-              Trayectoria de la Señal desde los Escombros hasta la Superficie
-            </h2>
           </div>
-          <span class="tag-status" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.4); color: var(--cyan-radar);">
-            MULTIHOP MESH VIVO
-          </span>
+
+          <button id="btn-simulate-pulse" class="terminal-trigger-btn">
+            ⚡ SIMULAR PULSO DE TRANSMISIÓN DE FARO
+          </button>
         </div>
 
-        <div class="nodes-grid">
-          <!-- Node 1 -->
-          <div class="node-block origin">
-            <div class="node-tag" style="color: var(--red-emergency);">NODO ORIGEN [PISO -2]</div>
-            <div class="node-title">Víctima Atrapada</div>
-            <div class="node-desc">Emite faro SOS cada 30s con coordenadas exactas y mensaje de auxilio.</div>
-            <div class="node-telemetry">TX: 0x30 [SOS_BEACON] &bull; TTL=20</div>
-          </div>
+        <div style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono); line-height: 1.45;">
+          Nota técnica: El protocolo binario empaqueta latitud, longitud, nivel de batería y firma criptográfica en un solo paquete compacto transmitido en los canales de publicidad BLE 37, 38 y 39.
+        </div>
+      </div>
+    </section>
 
-          <!-- Node 2 -->
-          <div class="node-block">
-            <div class="node-tag" style="color: var(--cyan-radar);">REPETIDOR PASIVO 1 [PISO 0]</div>
-            <div class="node-title">Celular de Residente</div>
-            <div class="node-desc">Capta la señal por BLE y la retransmite al instante sin intervención.</div>
-            <div class="node-telemetry">RELAY: TTL=19 &bull; RSSI=-78dBm</div>
+    <!-- SEC 002: Propagation Flow Diagram -->
+    <section id="sec-002" class="section-propagation">
+      <div class="section-head-bar">
+        <div>
+          <div class="section-tag">
+            <span class="tag-index">[ SEC // 002 ]</span>
+            <span class="tag-title">DIAGRAMA DE ARQUITECTURA DE RADIO</span>
           </div>
+          <h2 class="section-main-title">
+            FIG 02 // Trayectoria de Propagación Salto-a-Salto (TTL 20)
+          </h2>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); font-weight: 700;">
+          SELECCIONA UNA ETAPA PARA AUDITAR LA TELEMETRÍA
+        </div>
+      </div>
 
-          <!-- Node 3 -->
-          <div class="node-block">
-            <div class="node-tag" style="color: var(--cyan-radar);">REPETIDOR PASIVO 2 [CALLE]</div>
-            <div class="node-title">Celular de Transeúnte</div>
-            <div class="node-desc">Propaga el paquete hacia la avenida principal y campamento de rescate.</div>
-            <div class="node-telemetry">RELAY: TTL=18 &bull; RSSI=-65dBm</div>
+      <div class="propagation-columns">
+        <!-- Node 1 -->
+        <div class="prop-column active" onclick="selectHop(1)">
+          <span class="prop-tag origin">ETAPA 01 // ORIGEN</span>
+          <div class="prop-node-title">Víctima en Sótano</div>
+          <p class="prop-desc">
+            Bajo 2 niveles de losas colapsadas. El faro transmite el paquete `0x30` cada 30 segundos con coordenadas exactas y mensaje táctico.
+          </p>
+          <div class="prop-telemetry-box">
+            <span style="color: var(--red-emergency); font-weight: 800;">TX: [0x30] • TTL: 20</span>
+            <span style="color: var(--text-dim);">BLE ADV CH 37/38/39</span>
           </div>
+        </div>
 
-          <!-- Node 4 -->
-          <div class="node-block destination">
-            <div class="node-tag" style="color: var(--green-status);">NODO RECEPTOR [EXTERIOR]</div>
-            <div class="node-title">Brigada de Búsqueda</div>
-            <div class="node-desc">El teléfono vibra con fuerza y abre el punto exacto en el mapa GPS.</div>
-            <div class="node-telemetry" style="color: var(--green-status);">VIBRACIÓN SOS + MAPA LISTO</div>
+        <!-- Node 2 -->
+        <div class="prop-column" onclick="selectHop(2)">
+          <span class="prop-tag relay">ETAPA 02 // REPETIDOR 1</span>
+          <div class="prop-node-title">Celular de Residente</div>
+          <p class="prop-desc">
+            En piso 0. Capta la radiofrecuencia a 35m. Decrementa el TTL a 19 y retransmite inmediatamente en segundo plano sin despertar pantalla.
+          </p>
+          <div class="prop-telemetry-box">
+            <span style="color: var(--cyan-radio); font-weight: 800;">RELAY: FORWARD • TTL: 19</span>
+            <span style="color: var(--text-dim);">RSSI RECEPTOR: -78 dBm</span>
+          </div>
+        </div>
+
+        <!-- Node 3 -->
+        <div class="prop-column" onclick="selectHop(3)">
+          <span class="prop-tag relay">ETAPA 03 // REPETIDOR 2</span>
+          <div class="prop-node-title">Celular de Transeúnte</div>
+          <p class="prop-desc">
+            En la vía pública. Propaga el paquete hacia la avenida principal y perímetro exterior donde operan los vehículos de rescate.
+          </p>
+          <div class="prop-telemetry-box">
+            <span style="color: var(--cyan-radio); font-weight: 800;">RELAY: FORWARD • TTL: 18</span>
+            <span style="color: var(--text-dim);">RSSI RECEPTOR: -64 dBm</span>
+          </div>
+        </div>
+
+        <!-- Node 4 -->
+        <div class="prop-column" onclick="selectHop(4)">
+          <span class="prop-tag dest">ETAPA 04 // DESTINO RESCATE</span>
+          <div class="prop-node-title">Brigada de Búsqueda</div>
+          <p class="prop-desc">
+            El teléfono vibra de inmediato con el patrón táctico Morse de auxilio (`... --- ...`), deduplica la alerta y abre el punto exacto en el mapa.
+          </p>
+          <div class="prop-telemetry-box">
+            <span style="color: var(--green-live); font-weight: 800;">ALERTA HÁPTICA + MAPA GPS</span>
+            <span style="color: var(--text-dim);">DEDUPLICACIÓN: 1 CARD / VÍCTIMA</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Comparison Matrix Section -->
-  <section class="section-compare">
-    <div class="container">
-      <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800; color: var(--red-emergency); letter-spacing: 1px;">
-        MATRIZ DE SUPERVIVENCIA EN DESASTRES
+    <!-- SEC 003: Comparison Matrix Table & Survival Calculator -->
+    <section id="sec-003" class="section-matrix">
+      <div class="section-tag">
+        <span class="tag-index">[ SEC // 003 ]</span>
+        <span class="tag-title">MATRIZ TÉCNICA DE RESILIENCIA Y AUTONOMÍA</span>
       </div>
-      <h2 style="font-family: var(--font-display); font-size: 2rem; font-weight: 900; margin-top: 4px;">
-        ¿Por qué las Apps Tradicionales Fallan en un Terremoto?
+      <h2 class="section-main-title">
+        TABLA 01 // Vulnerabilidad de Redes Convencionales vs. SOSBlu
       </h2>
 
-      <div class="matrix-grid">
-        <div class="matrix-card trad">
-          <div class="matrix-header" style="color: #ef4444;">✕ APLICACIONES Y REDES CONVENCIONALES</div>
-          <ul class="matrix-list">
-            <li>• Requieren torres celulares y servidores en la nube.</li>
-            <li>• Bloqueadas si no hay saldo, plan de datos o tarjeta SIM.</li>
-            <li>• Agotan la batería en minutos buscando señal celular inexistente.</li>
-            <li>• Las víctimas bajo escombros quedan en silencio absoluto.</li>
-          </ul>
-        </div>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="col-param">PARÁMETRO OPERATIVO</th>
+            <th class="col-trad">✕ REDES CELULARES (4G / 5G / WHATSAPP)</th>
+            <th class="col-sos">✓ RED MALLA OFFLINE SOSBLU (BLE)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-param">Dependencia de Infraestructura</td>
+            <td class="td-trad">Total. Inutilizable si colapsa la torre repetidora o la fibra óptica.</td>
+            <td class="td-sos">Cero. Opera de teléfono a teléfono mediante ondas directas BLE.</td>
+          </tr>
+          <tr>
+            <td class="td-param">Consumo de Batería en Desastre</td>
+            <td class="td-trad">Extremo. Drena la batería en 2-4 horas buscando antenas celulares caídas.</td>
+            <td class="td-sos">Ultrabajo. En Modo Avión + BLE emite continuamente de 48h a 72h.</td>
+          </tr>
+          <tr>
+            <td class="td-param">Requisitos de Acceso</td>
+            <td class="td-trad">Requiere saldo, plan de datos activo, cobertura y tarjeta SIM.</td>
+            <td class="td-sos">Ninguno. Funciona sin SIM, sin saldo y sin cuenta de usuario.</td>
+          </tr>
+          <tr>
+            <td class="td-param">Alerta y Localización de Rescate</td>
+            <td class="td-trad">Silencio absoluto si no hay red para enrutar paquetes a servidores.</td>
+            <td class="td-sos">Vibración háptica Morse inmediata + apertura directa en mapa satelital GPS.</td>
+          </tr>
+        </tbody>
+      </table>
 
-        <div class="matrix-card sos">
-          <div class="matrix-header" style="color: #22c55e;">✓ RED MALLA TÁCTICA SOSBLU</div>
-          <ul class="matrix-list">
-            <li>• Opera 100% de teléfono a teléfono vía Bluetooth Low Energy.</li>
-            <li>• Totalmente funcional en Modo Avión con Bluetooth activo.</li>
-            <li>• Modo de energía SOS Ultra con autonomía de 48h a 72h.</li>
-            <li>• Dispara vibración física en los celulares de los rescatistas.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Download Station -->
-  <section class="section-download">
-    <div class="container">
-      <div class="download-banner">
-        <div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: var(--cyan-radar); margin-bottom: 4px;">
-            DISTRIBUCIÓN OFICIAL DE CÓDIGO ABIERTO
+      <!-- Battery & Survival Calculator -->
+      <div class="calculator-panel">
+        <div class="calc-inputs">
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 900; color: var(--text-white); letter-spacing: 0.5px;">
+            CALCULADORA DE AUTONOMÍA DE FARO (POWERMANAGER PROFILE)
           </div>
-          <h3 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 900;">
-            Descargar SOSBlu v1.1.0 para Android
-          </h3>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
-            Paquete universal SOSBlu-v1.1.0.apk (77.1 MB) &bull; Compatible con Android 8.0 o superior
+
+          <div class="calc-slider-group">
+            <div class="slider-header">
+              <span style="color: var(--text-muted);">NIVEL DE BATERÍA DEL DISPOSITIVO</span>
+              <span id="slider-batt-val" style="color: var(--green-live);">82%</span>
+            </div>
+            <input type="range" id="slider-batt" min="5" max="100" value="82">
+          </div>
+
+          <div class="calc-slider-group">
+            <div class="slider-header">
+              <span style="color: var(--text-muted);">CADENCIA DE TRANSMISIÓN BLE</span>
+              <span id="slider-interval-val" style="color: var(--cyan-radio);">Cada 30 Segundos</span>
+            </div>
+            <input type="range" id="slider-interval" min="10" max="60" step="10" value="30">
           </div>
         </div>
 
-        <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-action-primary" style="white-space: nowrap;">
-          DESCARGAR .APK DIRECTO
-        </a>
+        <div class="calc-display">
+          <span class="calc-display-label">TIEMPO ESTIMADO DE EMISIÓN DE SOCORRO:</span>
+          <span id="calc-result-hours" class="calc-display-val">61.5 Horas</span>
+          <span class="calc-display-sub">
+            Modo Avión con Bluetooth activo • CPU WakeLock optimizado • Consumo: ~1.33% batería/hora
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEC 004: Downloads & Sideload Guide -->
+    <section id="sec-004" class="section-download">
+      <!-- Download Left -->
+      <div class="dl-left">
+        <div class="section-tag">
+          <span class="tag-index">[ SEC // 004 ]</span>
+          <span class="tag-title">DISTRIBUCIÓN OFICIAL DE BINARIOS APK</span>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; color: var(--text-white); text-transform: uppercase;">
+          Descargas y Compilación Local
+        </h3>
+
+        <!-- Universal APK -->
+        <div class="apk-card">
+          <div>
+            <div class="apk-title">SOSBlu-v1.1.0.apk (Universal)</div>
+            <div class="apk-sub">Paquete universal compatible con arquitecturas ARMv7, ARM64, x86_64 • 77.1 MB</div>
+          </div>
+          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0.apk" class="btn-brutal-primary" style="padding: 12px 20px; font-size: 0.72rem; white-space: nowrap;">
+            DESCARGAR APK →
+          </a>
+        </div>
+
+        <!-- ARM64 APK -->
+        <div class="apk-card">
+          <div>
+            <div class="apk-title">SOSBlu-v1.1.0-arm64.apk (Optimizado)</div>
+            <div class="apk-sub">Compilación nativa ligera para dispositivos modernos de 64 bits • 45.2 MB</div>
+          </div>
+          <a href="https://github.com/ydmmejia/SOSBlu/releases/download/v1.1.0/SOSBlu-v1.1.0-arm64.apk" class="btn-brutal-secondary" style="padding: 12px 20px; font-size: 0.72rem; white-space: nowrap;">
+            DESCARGAR ARM64 →
+          </a>
+        </div>
+
+        <!-- Local Build Command -->
+        <div style="background: var(--bg-alt); border: 1px solid var(--border-grid); padding: 14px 18px; font-family: var(--font-mono); font-size: 0.72rem;">
+          <div style="color: var(--text-dim); margin-bottom: 6px; font-weight: 700;">COMPILACIÓN DESDE CÓDIGO FUENTE (GRADLE):</div>
+          <code style="color: var(--text-white); user-select: all;">git clone https://github.com/ydmmejia/SOSBlu.git &amp;&amp; ./gradlew :app:assembleDebug</code>
+        </div>
       </div>
 
-      <!-- Disclaimer -->
-      <div class="disclaimer-card">
-        <span class="disclaimer-tag">AVISO DE RESPONSABILIDAD (DISCLAIMER):</span>
-        SOSBlu no es una aplicación oficial gubernamental, militar ni de organismos estatales de rescate. Es un proyecto y herramienta independiente de código abierto desarrollado por iniciativa ciudadana para brindar una alternativa complementaria de comunicación fuera de línea durante catástrofes. En caso de emergencias con red móvil disponible, comuníquese prioritariamente con las líneas y autoridades oficiales de su país (ej. 911 / 123 / 112).
-      </div>
-    </div>
-  </section>
+      <!-- Guide Right -->
+      <div class="dl-right">
+        <h4 class="guide-title">
+          Instrucciones de Instalación en Android
+        </h4>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container footer-content">
+        <ol class="guide-steps">
+          <li><strong>1. Descarga el APK:</strong> Guarda el archivo universal o ARM64 en el almacenamiento de tu dispositivo.</li>
+          <li><strong>2. Orígenes Desconocidos:</strong> Al abrir el instalador, si Android muestra un diálogo de seguridad estándar, presiona <em>Ajustes</em> y activa <em>"Permitir desde esta fuente"</em>.</li>
+          <li><strong>3. Google Play Protect:</strong> Si el analizador preventivo muestra una alerta de app no reconocida, toca en <em>"Más detalles"</em> y luego en <em>"Instalar de todas formas"</em> (procedimiento habitual para apps libres de GitHub).</li>
+          <li><strong>4. Permisos de Radio:</strong> Concede los permisos de Bluetooth y Ubicación para permitir la transmisión y escaneo continuo en segundo plano.</li>
+        </ol>
+
+        <!-- Mandatory Disclaimer -->
+        <div class="disclaimer-box">
+          <span class="disclaimer-tag">AVISO IMPORTANTE Y DE RESPONSABILIDAD (DISCLAIMER):</span>
+          SOSBlu es un proyecto y herramienta independiente de código abierto creada por iniciativa ciudadana para brindar una alternativa complementaria de comunicación fuera de línea durante catástrofes y colapsos de infraestructura. No es un organismo estatal ni sustituye a los servicios oficiales de rescate. En cualquier emergencia con red telefónica disponible, comuníquese prioritariamente con las líneas de auxilio de su país (ej. 911 / 123 / 112).
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer Colophon -->
+    <footer>
       <div>
-        <strong>SOSBlu</strong> &bull; Protocolo Táctico de Rescate y Auxilio BLE
+        <strong>SOSBlu</strong> • Red de Auxilio BLE para Terremotos y Desastres (Offline Mesh)
       </div>
 
       <div class="footer-links">
-        <a href="mailto:yemejiam@unal.edu.co">Contacto: yemejiam@unal.edu.co</a>
+        <a href="mailto:yemejiam@unal.edu.co">Contacto Técnico</a>
         <a href="https://github.com/ydmmejia/SOSBlu" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/ydmmejia/SOSBlu/releases">Releases</a>
       </div>
-    </div>
-  </footer>
+    </footer>
+
+  </div>
+
+  <script>
+    // Simulator Interactive Logic
+    let pulseCount = 0;
+    const btnSimulate = document.getElementById('btn-simulate-pulse');
+    const timeElem = document.getElementById('telemetry-time');
+    const rssiElem = document.getElementById('telemetry-rssi');
+
+    if (btnSimulate) {
+      btnSimulate.addEventListener('click', () => {
+        pulseCount++;
+        timeElem.textContent = Date.now();
+        
+        // Jitter RSSI between -62 and -74 dBm
+        const randomRssi = -(Math.floor(Math.random() * 12) + 62);
+        rssiElem.textContent = `${randomRssi} dBm`;
+        
+        btnSimulate.textContent = `✓ FARO EMITIDO (PULSO #${pulseCount}) [TTL: 20]`;
+        btnSimulate.style.background = '#22c55e';
+        btnSimulate.style.color = '#000';
+
+        setTimeout(() => {
+          btnSimulate.textContent = '⚡ SIMULAR PULSO DE TRANSMISIÓN DE FARO';
+          btnSimulate.style.background = '#14161f';
+          btnSimulate.style.color = 'var(--text-main)';
+        }, 1200);
+      });
+    }
+
+    // Propagation Flow Selector
+    function selectHop(step) {
+      const columns = document.querySelectorAll('.prop-column');
+      columns.forEach((col, idx) => {
+        if (idx + 1 === step) {
+          col.classList.add('active');
+        } else {
+          col.classList.remove('active');
+        }
+      });
+    }
+
+    // Battery Survival Calculator
+    const sliderBatt = document.getElementById('slider-batt');
+    const sliderBattVal = document.getElementById('slider-batt-val');
+    const sliderInterval = document.getElementById('slider-interval');
+    const sliderIntervalVal = document.getElementById('slider-interval-val');
+    const calcResultHours = document.getElementById('calc-result-hours');
+
+    function updateCalculator() {
+      const batt = parseInt(sliderBatt.value, 10);
+      const interval = parseInt(sliderInterval.value, 10);
+
+      sliderBattVal.textContent = `${batt}%`;
+      sliderIntervalVal.textContent = `Cada ${interval} Segundos`;
+
+      // Drain formula in Airplane Mode + BLE:
+      // interval 10s: ~1.8% / hr -> 100% = 55 hrs
+      // interval 30s: ~1.33% / hr -> 100% = 75 hrs
+      // interval 60s: ~1.0% / hr -> 100% = 100 hrs
+      const drainPerHour = 1.0 + (30 / interval) * 0.33;
+      const hours = (batt / drainPerHour).toFixed(1);
+
+      calcResultHours.textContent = `${hours} Horas`;
+      
+      const hoursElem = document.getElementById('telemetry-hours');
+      const battElem = document.getElementById('telemetry-batt');
+      if (hoursElem) hoursElem.textContent = `${Math.floor(hours)}h restantes`;
+      if (battElem) battElem.textContent = `${batt}%`;
+    }
+
+    if (sliderBatt && sliderInterval) {
+      sliderBatt.addEventListener('input', updateCalculator);
+      sliderInterval.addEventListener('input', updateCalculator);
+    }
+  </script>
 
 </body>
 </html>
