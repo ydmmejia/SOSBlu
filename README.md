@@ -14,6 +14,9 @@
   <a href="https://github.com/ydmmejia/SOSBlu/releases">
     <img src="https://img.shields.io/badge/Versión-v1.1.0-B71C1C?style=for-the-badge&logo=github&labelColor=1E293B" alt="Versión v1.1.0" />
   </a>
+  <a href="https://github.com/ydmmejia/SOSBlu/releases">
+    <img src="https://img.shields.io/github/downloads/ydmmejia/SOSBlu/total?color=00C851&style=for-the-badge&logo=github&label=Descargas" alt="Descargas Totales" />
+  </a>
   <img src="https://img.shields.io/badge/Android-API%2026%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=1E293B" alt="Android API 26+" />
   <img src="https://img.shields.io/badge/Red-BLE%20Mesh%20Offline-0284C7?style=for-the-badge&logo=bluetooth&logoColor=white&labelColor=1E293B" alt="BLE Mesh" />
   <img src="https://img.shields.io/badge/Criptografía-Ed25519%20%2B%20Noise-64748B?style=for-the-badge&logo=shield&logoColor=white&labelColor=1E293B" alt="Ed25519 Noise" />
